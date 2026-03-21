@@ -36,4 +36,24 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Search Products API
+export const searchProducts = async (query, filters = {}) => {
+  try {
+    const params = new URLSearchParams();
+    
+    if (query) params.append('query', query);
+    if (filters.category) params.append('category', filters.category);
+    if (filters.minPrice) params.append('minPrice', filters.minPrice);
+    if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+    if (filters.page) params.append('page', filters.page);
+    if (filters.limit) params.append('limit', filters.limit);
+
+    const response = await apiClient.get(`/products/search?${params.toString()}`);
+    return response;
+  } catch (error) {
+    console.error('Search API error:', error);
+    throw error;
+  }
+};
+
 export default apiClient;

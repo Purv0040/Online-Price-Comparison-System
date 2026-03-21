@@ -144,13 +144,28 @@ const searchProducts = async (req, res) => {
   try {
     const { query, category, minPrice, maxPrice, page = 1, limit = 20 } = req.query;
 
-    const filter = {};
-    if (category) filter.category = category;
-    if (query) filter.$text = { $search: query };
+    const filter = { isActive: true };
+    
+    // Category filter
+    if (category) {
+      filter.category = category;
+    }
+
+    // Enhanced search logic with case-insensitive and partial matching
+    if (query) {
+      const searchRegex = new RegExp(query, 'i'); // Case-insensitive regex
+      filter.$or = [
+        { title: { $regex: searchRegex } },
+        { brand: { $regex: searchRegex } },
+        { category: { $regex: searchRegex } },
+        { tags: { $in: [searchRegex] } }
+      ];
+    }
 
     const products = await Product.find(filter)
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .sort({ rating: -1, createdAt: -1 });
 
     const total = await Product.countDocuments(filter);
 
@@ -167,6 +182,7 @@ const searchProducts = async (req, res) => {
       });
     }
 
+    // Price filtering after getting lowest prices
     if (minPrice || maxPrice) {
       productsWithPrices = productsWithPrices.filter((p) => {
         const price = p.lowestPrice || 0;

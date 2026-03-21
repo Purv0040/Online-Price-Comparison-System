@@ -20,6 +20,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    tags: [{
+      type: String,
+      trim: true,
+    }],
     image: {
       type: String,
       default: null,
@@ -61,7 +65,7 @@ const productSchema = new mongoose.Schema(
 );
 
 // Index for faster searches
-productSchema.index({ title: 'text', brand: 'text', category: 1 });
+productSchema.index({ title: 'text', brand: 'text', category: 1, tags: 1 });
 productSchema.index({ originalUrl: 1 });
 
 module.exports = mongoose.model('Product', productSchema);

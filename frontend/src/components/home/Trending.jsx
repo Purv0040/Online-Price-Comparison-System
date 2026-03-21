@@ -110,11 +110,15 @@ export default function Trending() {
         {products.map((p, i) => (
           <div
             key={p._id}
-            className="group bg-white rounded-2xl border border-[#d0d7e7] overflow-hidden flex flex-col hover:shadow-xl transition-shadow relative"
+            onClick={() => navigate(`/product/${p._id}`)}
+            className="group bg-white rounded-2xl border border-[#d0d7e7] overflow-hidden flex flex-col hover:shadow-xl transition-shadow relative cursor-pointer"
           >
             {/* Wishlist */}
             <button
-              onClick={() => handleWishlistToggle(p)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleWishlistToggle(p);
+              }}
               disabled={addingProduct === p._id}
               className={`absolute top-3 right-3 z-10 p-2 bg-white rounded-full transition shadow-sm disabled:opacity-50 ${
                 isInWishlist(p._id) ? "text-red-500" : "text-gray-400 hover:text-red-500"
@@ -146,7 +150,13 @@ export default function Trending() {
 
             {/* Content */}
             <div className="p-5 flex flex-col flex-1 bg-white">
-              <p className="text-xs text-[#4d6599] font-medium mb-1">
+              <p 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/search?query=${encodeURIComponent(p.brand)}`);
+                }}
+                className="text-xs text-[#4d6599] font-medium mb-1 hover:text-blue-600 cursor-pointer transition-colors"
+              >
                 {p.brand}
               </p>
 
@@ -169,7 +179,10 @@ export default function Trending() {
                     {p.stores}
                   </span>
                   <button
-                    onClick={() => navigate(`/product/${p._id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/product/${p._id}`);
+                    }}
                     className="px-3 py-1.5 bg-[#f8f9fc] text-[#0e121b] text-xs font-bold rounded-lg border border-[#d0d7e7] hover:bg-primary hover:text-white hover:border-primary transition-all"
                   >
                     Compare

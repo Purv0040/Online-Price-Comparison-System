@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 export default function SearchNavbar() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
-  const [search, setSearch] = useState("Smartphones");
+  const [search, setSearch] = useState("");
   const [showMenu, setShowMenu] = useState(false);
 
   const handleWishlistClick = () => {
@@ -25,7 +25,20 @@ export default function SearchNavbar() {
   };
 
   const handleClearSearch = () => {
-    setSearch(""); // 🔥 clears the search bar
+    setSearch("");
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (search.trim()) {
+      navigate(`/search?q=${encodeURIComponent(search.trim())}`);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(e);
+    }
   };
 
   return (
@@ -42,47 +55,58 @@ export default function SearchNavbar() {
 
         {/* Search Bar */}
         <div className="flex-1 max-w-2xl">
-          <label className="relative flex items-center w-full h-10">
+          <form onSubmit={handleSearch} className="relative flex items-center w-full h-10">
             <div className="absolute left-3 text-[#4d6599]">
               <span className="material-symbols-outlined text-xl">search</span>
             </div>
 
             <input
-              className="w-full h-full pl-10 pr-10 rounded-lg border-none bg-[#e7ebf3] text-[#0e121b] placeholder:text-[#4d6599] focus:ring-2 focus:ring-primary transition-all text-sm"
-              placeholder="Search for products..."
+              className="w-full h-full pl-10 pr-20 rounded-lg border-none bg-[#e7ebf3] text-[#0e121b] placeholder:text-[#4d6599] focus:ring-2 focus:ring-primary transition-all text-sm"
+              placeholder="Search for products, brands or stores..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyPress={handleKeyPress}
             />
 
             {search && (
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="absolute right-3 text-[#4d6599] hover:text-red-500"
+                className="absolute right-12 text-[#4d6599] hover:text-red-500"
               >
                 <span className="material-symbols-outlined text-xl">
                   cancel
                 </span>
               </button>
             )}
-          </label>
+
+            <button
+              type="submit"
+              className="absolute right-2 bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              Search
+            </button>
+          </form>
         </div>
 
         {/* Right Actions */}
         <div className="flex items-center gap-4 shrink-0">
           <div className="hidden md:flex items-center gap-6 mr-4">
             <button
+              onClick={() => navigate("/category")}
+              className="text-sm font-medium text-[#0e121b] hover:text-primary transition-colors"
+            >
+              Categories
+            </button>
+            <button
               onClick={handleWishlistClick}
               className="text-sm font-medium text-[#0e121b] hover:text-primary transition-colors"
             >
               Wishlist
             </button>
-
-           
           </div>
 
           {/* Profile */}
-          
 
           {/* Avatar */}
           <div
