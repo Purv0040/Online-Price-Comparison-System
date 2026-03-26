@@ -28,7 +28,7 @@ export default function SearchResults() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [priceRange, setPriceRange] = useState([100, 2000]);
+  const [priceRange, setPriceRange] = useState([0, 200000]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -59,9 +59,9 @@ export default function SearchResults() {
           brand: product.brand || 'Unknown',
           name: product.title,
           category: product.category,
-          price: `$${product.lowestPrice || 0}`,
+          price: `₹${product.lowestPrice || 0}`,
           priceNumber: product.lowestPrice || 0,
-          oldPrice: product.lowestPrice ? `$${Math.round(product.lowestPrice * 1.2)}` : '$0',
+          oldPrice: product.lowestPrice ? `₹${Math.round(product.lowestPrice * 1.2)}` : '₹0',
           sites: `Available on ${Math.floor(Math.random() * 10) + 1} sites`,
           badge: product.lowestPrice ? `${Math.floor(Math.random() * 30) + 10}% OFF` : 'NEW',
           inStock: true,
@@ -227,7 +227,7 @@ export default function SearchResults() {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const percent = Math.min(Math.max(x / rect.width, 0), 1);
-                const value = Math.round(100 + percent * (2000 - 100));
+                const value = Math.round(percent * 200000);
 
                 // move the nearer knob
                 const distMin = Math.abs(value - priceRange[0]);
@@ -244,8 +244,8 @@ export default function SearchResults() {
               <div
                 className="absolute h-1.5 bg-blue-600 rounded"
                 style={{
-                  left: `${((priceRange[0] - 100) / (2000 - 100)) * 100}%`,
-                  right: `${100 - ((priceRange[1] - 100) / (2000 - 100)) * 100}%`,
+                  left: `${(priceRange[0] / 200000) * 100}%`,
+                  right: `${100 - (priceRange[1] / 200000) * 100}%`,
                 }}
               />
 
@@ -253,7 +253,7 @@ export default function SearchResults() {
               <div
                 className="absolute -top-1 w-4 h-4 bg-blue-600 rounded-full cursor-pointer"
                 style={{
-                  left: `${((priceRange[0] - 100) / (2000 - 100)) * 100}%`,
+                  left: `${(priceRange[0] / 200000) * 100}%`,
                   transform: "translateX(-50%)",
                 }}
               />
@@ -262,7 +262,7 @@ export default function SearchResults() {
               <div
                 className="absolute -top-1 w-4 h-4 bg-blue-600 rounded-full cursor-pointer"
                 style={{
-                  left: `${((priceRange[1] - 100) / (2000 - 100)) * 100}%`,
+                  left: `${(priceRange[1] / 200000) * 100}%`,
                   transform: "translateX(-50%)",
                 }}
               />
@@ -272,7 +272,7 @@ export default function SearchResults() {
             <div className="flex gap-2">
               <input
                 className="border rounded-lg p-2 text-sm w-full"
-                value={`$${priceRange[0]}`}
+                value={`₹${priceRange[0]}`}
                 onChange={(e) =>
                   setPriceRange([
                     Number(e.target.value.replace(/\D/g, "")) || 0,
@@ -282,7 +282,7 @@ export default function SearchResults() {
               />
               <input
                 className="border rounded-lg p-2 text-sm w-full"
-                value={`$${priceRange[1]}`}
+                value={`₹${priceRange[1]}`}
                 onChange={(e) =>
                   setPriceRange([
                     priceRange[0],
@@ -370,10 +370,10 @@ export default function SearchResults() {
 
             {/* Price chip */}
             <div className="flex items-center gap-2 bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold">
-              ${priceRange[0]} - ${priceRange[1]}
+              ₹{priceRange[0]} - ₹{priceRange[1]}
               <span
                 className="material-symbols-outlined text-sm cursor-pointer"
-                onClick={() => setPriceRange([100, 2000])}
+                onClick={() => setPriceRange([0, 200000])}
               >
                 close
               </span>
@@ -467,7 +467,7 @@ export default function SearchResults() {
                   <p 
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/search?query=${encodeURIComponent(p.brand)}`);
+                      navigate(`/search?q=${encodeURIComponent(p.brand)}`);
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
                   >

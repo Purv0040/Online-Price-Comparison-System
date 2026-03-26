@@ -5,7 +5,12 @@ export default function PriceAlerts() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("priceAlerts")) || []
+    let saved = [];
+    try {
+      saved = JSON.parse(localStorage.getItem("priceAlerts")) || []
+    } catch (e) {
+      saved = []
+    }
     setAlerts(saved)
   }, [])
 

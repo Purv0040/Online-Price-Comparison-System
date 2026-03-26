@@ -22,7 +22,12 @@ export default function ProductInfo() {
 
   // 🔹 On load: check if this product already has a price alert
   useEffect(() => {
-    const existing = JSON.parse(localStorage.getItem("priceAlerts")) || []
+    let existing = []
+    try {
+      existing = JSON.parse(localStorage.getItem("priceAlerts")) || []
+    } catch (e) {
+      existing = []
+    }
     const already = existing.find((p) => p.name === product.name)
     if (already) {
       setAlertOn(true)
@@ -34,7 +39,12 @@ export default function ProductInfo() {
     const newValue = !alertOn
     setAlertOn(newValue)
 
-    const existing = JSON.parse(localStorage.getItem("priceAlerts")) || []
+    let existing = []
+    try {
+      existing = JSON.parse(localStorage.getItem("priceAlerts")) || []
+    } catch (e) {
+      existing = []
+    }
 
     if (newValue) {
       // turn ON → add if not exists

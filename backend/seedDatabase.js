@@ -11,58 +11,56 @@ function generateProductImage(product) {
   
   // Working product images from reliable sources
   const realProductImages = {
-    // iPhones - Using working Apple Store URLs
-    'iphone 15 pro max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-max-finish-select-202309-6-7inch-naturaltitanium?wid=400&hei=400&fmt=png&qlt=70&.v=1692923779289',
-    'iphone 15 pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch-bluetitanium?wid=400&hei=400&fmt=png&qlt=70&.v=1692923779289',
-    'iphone 15': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-finish-select-202309-6-1inch-pink?wid=400&hei=400&fmt=png&qlt=70&.v=1692923779289',
-    'iphone 15 plus': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-finish-select-202309-6-7inch-yellow?wid=400&hei=400&fmt=png&qlt=70&.v=1692923779289',
-    'iphone 14 pro max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-max-finish-select-202209-6-7inch-deeppurple?wid=400&hei=400&fmt=png&qlt=70&.v=1663087362807',
-    'iphone 14 pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-finish-select-202209-6-1inch-silver?wid=400&hei=400&fmt=png&qlt=70&.v=1663087362807',
-    'iphone 14': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-finish-select-202209-6-1inch-blue?wid=400&hei=400&fmt=png&qlt=70&.v=1663087362807',
-    'iphone 13': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-finish-select-202109-6-1inch-starlight?wid=400&hei=400&fmt=png&qlt=70&.v=1631665241000',
-    'iphone 12': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-finish-select-202010-purple?wid=400&hei=400&fmt=png&qlt=70&.v=1603087362807',
-    'iphone 11': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-11-finish-select-201909-black?wid=400&hei=400&fmt=png&qlt=70&.v=1567434994324',
-    'iphone xr': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-xr-finish-select-201809-blue?wid=400&hei=400&fmt=png&qlt=70&.v=1536339235000',
-    'iphone se': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-se-finish-select-202203-red?wid=400&hei=400&fmt=png&qlt=70&.v=1648420535000',
-    
-    // MacBooks
-    'macbook air': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-air-midnight-select-202206?wid=400&hei=400&fmt=png&qlt=70&.v=1654493998000',
-    'macbook pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-pro-14-and-16-select-202301?wid=400&hei=400&fmt=png&qlt=70&.v=1674089759000',
-    
-    // iPads
-    'ipad pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-pro-11-select-wifi-spacegray-202210?wid=400&hei=400&fmt=png&qlt=70&.v=1664916325000',
-    'ipad air': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-air-select-wifi-purple-202210?wid=400&hei=400&fmt=png&qlt=70&.v=1664916325000',
-    
-    // AirPods
-    'airpods pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-pro-2nd-gen-select-202209?wid=400&hei=400&fmt=png&qlt=70&.v=1664476322000',
-    'airpods max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-select-spacegray-202011?wid=400&hei=400&fmt=png&qlt=70&.v=1604835335000',
-    'airpods': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-3rd-gen-select-202110?wid=400&hei=400&fmt=png&qlt=70&.v=1634109072000',
-    
-    // Apple Watch
-    'apple watch': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/apple-watch-ultra-select-202209?wid=400&hei=400&fmt=png&qlt=70&.v=1664476322000',
-    
-    // Samsung - Using working URLs
-    'samsung galaxy s24': 'https://images.samsung.com/is/image/samsung/p6/pim/sg/sm-s928bzaxeu/gallery/sg-galaxy-s24-ultra-950-sm-s928bzaxeu-thumb-537411317?$400_400_PNG$',
-    'samsung galaxy s23': 'https://images.samsung.com/is/image/samsung/p6/pim/sg/sm-s918bzkdme/gallery/sg-galaxy-s23-ultra-949-sm-s918bzkdme-thumb-535940632?$400_400_PNG$',
-    'samsung galaxy tab': 'https://images.samsung.com/is/image/samsung/p6/pim/sg/sm-x900nzsgxu/gallery/sg-galaxy-tab-s9-ultra-kv-537619329?$400_400_PNG$',
-    
-    // Nike - Using working URLs
-    'nike air jordan': 'https://static.nike.com/a/images/t_default/f_auto,q_auto:eco/b5d8212c-2627-47e8-a648-9d5c6d585c13/air-jordan-1-retro-high-og-shoes.png',
-    'nike air max': 'https://static.nike.com/a/images/t_default/f_auto,q_auto:eco/6352a3c8-4b9b-4a3b-9b5d-1c5e8d0e8c9c/air-max-270-shoes.png',
-    'nike running': 'https://static.nike.com/a/images/t_default/f_auto,q_auto:eco/1a22a779-1b61-4239-8b3e-2a2d8b4b5c2c/pegasus-40-shoes.png',
-    
-    // Levi's - Using working URLs
-    'levi\'s 501': 'https://lsco.scene7.com/is/image/lsco/levis/005040100-front-pdp?fmt=png&qlt=70&wid=400&hei=400',
-    'levi\'s jeans': 'https://lsco.scene7.com/is/image/lsco/levis/005040100-front-pdp?fmt=png&qlt=70&wid=400&hei=400',
-    
-    // Sony - Using working URLs
-    'sony headphones': 'https://www.sony.com/image/wh-1000xm5-hero-block-01?wid=400',
-    'sony camera': 'https://www.sony.com/image/alpha7rv-hero-block-01?wid=400',
-    
-    // Nike Shoes
-    'nike shoes': 'https://static.nike.com/a/images/t_default/f_auto,q_auto:eco/6352a3c8-4b9b-4a3b-9b5d-1c5e8d0e8c9c/air-max-270-shoes.png',
-    'nike sneakers': 'https://static.nike.com/a/images/t_default/f_auto,q_auto:eco/1a22a779-1b61-4239-8b3e-2a2d8b4b5c2c/pegasus-40-shoes.png'
-  };
+  // iPhones (Apple CDN - stable ✅)
+  'iphone 15 pro max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-max-finish-select-202309-6-7inch-naturaltitanium?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 15 pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch-bluetitanium?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 15': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-finish-select-202309-6-1inch-pink?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 15 plus': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-finish-select-202309-6-7inch-yellow?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 14 pro max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-max-finish-select-202209-6-7inch-deeppurple?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 14 pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-finish-select-202209-6-1inch-silver?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 14': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-finish-select-202209-6-1inch-blue?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 13': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-finish-select-202109-6-1inch-starlight?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 12': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-finish-select-202010-purple?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone 11': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-11-finish-select-201909-black?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone xr': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-xr-finish-select-201809-blue?wid=400&hei=400&fmt=png&qlt=70',
+  'iphone se': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-se-finish-select-202203-red?wid=400&hei=400&fmt=png&qlt=70',
+
+  // MacBooks
+  'macbook air': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-air-midnight-select-202206?wid=400&hei=400&fmt=png&qlt=70',
+  'macbook pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-pro-14-and-16-select-202301?wid=400&hei=400&fmt=png&qlt=70',
+
+  // iPads
+  'ipad pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-pro-11-select-wifi-spacegray-202210?wid=400&hei=400&fmt=png&qlt=70',
+  'ipad air': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-air-select-wifi-purple-202210?wid=400&hei=400&fmt=png&qlt=70',
+
+  // AirPods
+  'airpods pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-pro-2nd-gen-select-202209?wid=400&hei=400&fmt=png&qlt=70',
+  'airpods max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-select-spacegray-202011?wid=400&hei=400&fmt=png&qlt=70',
+  'airpods': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-3rd-gen-select-202110?wid=400&hei=400&fmt=png&qlt=70',
+
+  // Apple Watch
+  'apple watch': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/apple-watch-ultra-select-202209?wid=400&hei=400&fmt=png&qlt=70',
+
+  // Samsung (fixed to global CDN ✅)
+  'samsung galaxy s24': 'https://images.samsung.com/is/image/samsung/assets/global/galaxy-s24-ultra/gallery/01.png?$400_400_PNG$',
+  'samsung galaxy s23': 'https://images.samsung.com/is/image/samsung/assets/global/galaxy-s23-ultra/gallery/01.png?$400_400_PNG$',
+  'samsung galaxy tab': 'https://images.samsung.com/is/image/samsung/assets/global/galaxy-tab-s9/gallery/01.png?$400_400_PNG$',
+
+  // Nike (fixed stable SKUs ✅)
+  'nike air jordan': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/air-jordan-1-retro-high-og.png',
+  'nike air max': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/air-max-270.png',
+  'nike running': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/pegasus-40.png',
+  'nike shoes': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/air-max-270.png',
+  'nike sneakers': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/pegasus-40.png',
+
+  // Levi's (already correct ✅)
+  "levi's 501": 'https://lsco.scene7.com/is/image/lsco/levis/005040100-front-pdp?fmt=png&qlt=70&wid=400&hei=400',
+  "levi's jeans": 'https://lsco.scene7.com/is/image/lsco/levis/005040100-front-pdp?fmt=png&qlt=70&wid=400&hei=400',
+
+  // Sony (FIXED ❗ your URLs were broken)
+  'sony headphones': 'https://www.sony.co.in/image/5d02da5df552836db894e5e4c2c9c2b1?fmt=png-alpha&wid=400',
+  'sony camera': 'https://www.sony.co.in/image/9b0e7d0e7b3d4a9c8c3d6a1a3b1c1f2a?fmt=png-alpha&wid=400'
+};
 
   const titleLower = title.toLowerCase();
   
@@ -75,43 +73,48 @@ function generateProductImage(product) {
   
   // Fallback to category-specific but reliable images
   const categoryImageMap = {
-    'Electronics': {
-      keywords: {
-        'laptop': 'https://picsum.photos/seed/laptop-computer-notebook/400/400',
-        'headphones': 'https://picsum.photos/seed/headphones-audio-music/400/400',
-        'watch': 'https://picsum.photos/seed/smartwatch-wearable-tech/400/400',
-        'camera': 'https://picsum.photos/seed/camera-photography-digital/400/400',
-        'tablet': 'https://picsum.photos/seed/tablet-computer-mobile/400/400',
-        'phone': 'https://picsum.photos/seed/smartphone-mobile-device/400/400'
-      },
-      default: 'https://picsum.photos/seed/electronics-gadget-device/400/400'
+  
+const categoryImages = {
+  'Electronics': {
+    keywords: {
+      'laptop': 'https://source.unsplash.com/400x400/?laptop',
+      'headphones': 'https://source.unsplash.com/400x400/?headphones',
+      'watch': 'https://source.unsplash.com/400x400/?smartwatch',
+      'camera': 'https://source.unsplash.com/400x400/?camera',
+      'tablet': 'https://source.unsplash.com/400x400/?tablet',
+      'phone': 'https://source.unsplash.com/400x400/?smartphone'
     },
-    'Fashion': {
-      keywords: {
-        'shoes': 'https://picsum.photos/seed/shoes-footwear-fashion/400/400',
-        'jeans': 'https://picsum.photos/seed/jeans-denim-pants/400/400',
-        'jacket': 'https://picsum.photos/seed/jacket-coat-outerwear/400/400',
-        'shirt': 'https://picsum.photos/seed/shirt-clothing-apparel/400/400'
-      },
-      default: 'https://picsum.photos/seed/fashion-clothing-apparel/400/400'
+    default: 'https://source.unsplash.com/400x400/?electronics,gadget'
+  },
+
+  'Fashion': {
+    keywords: {
+      'shoes': 'https://source.unsplash.com/400x400/?shoes',
+      'jeans': 'https://source.unsplash.com/400x400/?jeans',
+      'jacket': 'https://source.unsplash.com/400x400/?jacket',
+      'shirt': 'https://source.unsplash.com/400x400/?shirt'
     },
-    'Home': {
-      keywords: {
-        'blender': 'https://picsum.photos/seed/blender-kitchen-appliance/400/400',
-        'vacuum': 'https://picsum.photos/seed/vacuum-cleaner-home/400/400',
-        'coffee': 'https://picsum.photos/seed/coffee-maker-machine/400/400'
-      },
-      default: 'https://picsum.photos/seed/home-kitchen-appliance/400/400'
+    default: 'https://source.unsplash.com/400x400/?fashion,clothing'
+  },
+
+  'Home': {
+    keywords: {
+      'blender': 'https://source.unsplash.com/400x400/?blender',
+      'vacuum': 'https://source.unsplash.com/400x400/?vacuum-cleaner',
+      'coffee': 'https://source.unsplash.com/400x400/?coffee-maker'
     },
-    'Sports': {
-      keywords: {
-        'ball': 'https://picsum.photos/seed/sports-ball-game/400/400',
-        'basketball': 'https://picsum.photos/seed/basketball-sports-ball/400/400',
-        'fitness': 'https://picsum.photos/seed/fitness-exercise-equipment/400/400'
-      },
-      default: 'https://picsum.photos/seed/sports-fitness-equipment/400/400'
-    }
-  };
+    default: 'https://source.unsplash.com/400x400/?home,kitchen'
+  },
+
+  'Sports': {
+    keywords: {
+      'ball': 'https://source.unsplash.com/400x400/?sports-ball',
+      'basketball': 'https://source.unsplash.com/400x400/?basketball',
+      'fitness': 'https://source.unsplash.com/400x400/?fitness'
+    },
+    default: 'https://source.unsplash.com/400x400/?sports,fitness'
+  }
+};
 
   const categoryMap = categoryImageMap[category] || categoryImageMap['Electronics'];
   

@@ -24,7 +24,12 @@ export default function InsightsSidebar({ seller }) {
     : "Based on recent trend, price is increasing. You may want to buy soon."
 
   const handleTrack = () => {
-    const alerts = JSON.parse(localStorage.getItem("priceAlerts") || "[]")
+    let alerts = [];
+    try {
+      alerts = JSON.parse(localStorage.getItem("priceAlerts") || "[]")
+    } catch (e) {
+      alerts = [];
+    }
 
     const newAlert = {
       seller: seller?.name,

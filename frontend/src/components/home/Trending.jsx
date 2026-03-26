@@ -153,7 +153,7 @@ export default function Trending() {
               <p 
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/search?query=${encodeURIComponent(p.brand)}`);
+                  navigate(`/search?q=${encodeURIComponent(p.brand)}`);
                 }}
                 className="text-xs text-[#4d6599] font-medium mb-1 hover:text-blue-600 cursor-pointer transition-colors"
               >

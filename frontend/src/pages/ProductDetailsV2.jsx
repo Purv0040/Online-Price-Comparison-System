@@ -24,7 +24,11 @@ import ProductDetailsInfo from "../components/product-v2/ProductDetailsInfo";
     "https://lh3.googleusercontent.com/aida-public/AB6AXuDVuIFsumxQc5PFXa1FStv13tiAcyGD4nkz3DrOAtg9ofwFIYMZo7xwjVxq67FP0-ZRto8BWW4Ku0IX4LTKt9gP_W8vV-vTtvKQgy28mRfUFJN9OF-K8BK8fWSvM6IXXmmAHPVGl3AgVPyN6DYT8W7mS6QAYi2fTLGXHq3rfOAr7rQLt5hBfkAlfQCiXTW8HdsRalpNA1tLlMNolutm_tIGY4_La7F-CUZ5u4oZswQkzYUCq7pFBYBKh02_D3qpJiGUMorqfvKaaAIy"
   ]
  
-  const getPriceNumber = (price) => Number(price.replace(/[^0-9.]/g, ""));
+  const getPriceNumber = (price) => {
+    if (!price) return 0;
+    if (typeof price === 'number') return price;
+    return Number(String(price).replace(/[^0-9.]/g, ""));
+  };
 
   const prices = sellers.map((s) => getPriceNumber(s.price));
   const minPrice = Math.min(...prices);

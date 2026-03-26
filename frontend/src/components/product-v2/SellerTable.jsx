@@ -1,8 +1,11 @@
 import sellers from "../../data/productV2/sellers"
 
 export default function SellerTable({ onSelectSeller, selectedSeller }) {
-  const getPriceNumber = (price) =>
-    Number(price.replace(/[^0-9.]/g, ""))
+  const getPriceNumber = (price) => {
+    if (!price) return 0;
+    if (typeof price === 'number') return price;
+    return Number(String(price).replace(/[^0-9.]/g, ""));
+  };
 
   const prices = sellers.map((s) => getPriceNumber(s.price))
   const minPrice = Math.min(...prices)

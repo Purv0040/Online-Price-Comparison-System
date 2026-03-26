@@ -59,9 +59,9 @@ export default function Category() {
           brand: product.brand || 'Unknown',
           name: product.title,
           category: product.category,
-          price: `$${product.lowestPrice || 0}`,
+          price: `₹${product.lowestPrice || 0}`,
           priceNumber: product.lowestPrice || 0,
-          oldPrice: product.lowestPrice ? `$${Math.round(product.lowestPrice * 1.2)}` : '$0',
+          oldPrice: product.lowestPrice ? `₹${Math.round(product.lowestPrice * 1.2)}` : '₹0',
           sites: `Available on ${Math.floor(Math.random() * 10) + 1} sites`,
           badge: product.lowestPrice ? `${Math.floor(Math.random() * 30) + 10}% OFF` : 'NEW',
           inStock: true,
@@ -250,7 +250,7 @@ export default function Category() {
                     <p 
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/search?query=${encodeURIComponent(p.brand)}`);
+                      navigate(`/search?q=${encodeURIComponent(p.brand)}`);
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
                   >
