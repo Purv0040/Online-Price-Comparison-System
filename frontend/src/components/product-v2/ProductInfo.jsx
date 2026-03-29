@@ -3,20 +3,12 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { useWishlist } from "../../context/WishlistContext"
 
-export default function ProductInfo({ dynamicProduct }) {
+export default function ProductInfo({ product }) {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const { addToWishlist, isInWishlist } = useWishlist()
 
-  const product = dynamicProduct || {
-    _id: "prod_sony_wh1000xm5",
-    id: "prod_sony_wh1000xm5",
-    name: "Sony WH-1000XM5 Wireless Noise Cancelling Headphones",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD8LJ2FLhztgcF8RqQrnLWrnWZ5QNf2FSmO36mA1iCTmLuiCvlGU1uECNOoHEXmMUtx-CyWDyRSz6emnpkPTL6SlNUo6IQ0DrMMWEaLTB-srE910vYWrviSzrSXFvdcUK-RLjBs_KpbovwfUZoU_p9SpsYJYGB-IbL4MvRFbhjAT7KNGaArLEGHI-RYXJdkKWUYchxpOrVPPqokXJt_9Mf5dnxilYgtpkN2uhWypvITjRpPKuBQTTex-IFpP0SVpWm3XNTKFIq_p9vm",
-    current: "$348.00",
-    target: "$300.00",
-  }
+  if (!product) return null
 
   const [alertOn, setAlertOn] = useState(false)
 
@@ -28,11 +20,11 @@ export default function ProductInfo({ dynamicProduct }) {
     } catch (e) {
       existing = []
     }
-    const already = existing.find((p) => p.name === product.name)
+    const already = existing.find((p) => p.name === product.title)
     if (already) {
       setAlertOn(true)
     }
-  }, [])
+  }, [product.title])
 
   // 🔹 Toggle price alert
   const handleToggle = () => {
@@ -48,14 +40,14 @@ export default function ProductInfo({ dynamicProduct }) {
 
     if (newValue) {
       // turn ON → add if not exists
-      const already = existing.find((p) => p.name === product.name)
+      const already = existing.find((p) => p.name === product.title)
       if (!already) {
-        const updated = [...existing, { ...product, active: true }]
+        const updated = [...existing, { ...product, name: product.title, active: true }]
         localStorage.setItem("priceAlerts", JSON.stringify(updated))
       }
     } else {
       // turn OFF → remove from alerts
-      const updated = existing.filter((p) => p.name !== product.name)
+      const updated = existing.filter((p) => p.name !== product.title)
       localStorage.setItem("priceAlerts", JSON.stringify(updated))
     }
   }
@@ -88,7 +80,7 @@ export default function ProductInfo({ dynamicProduct }) {
           </span>
 
           <h1 className="mt-4 text-[28px] font-bold leading-tight text-slate-900">
-            {product.name}
+            {product.title}
           </h1>
 
           <div className="mt-3 flex items-center gap-3 text-sm">
@@ -96,10 +88,10 @@ export default function ProductInfo({ dynamicProduct }) {
               <span className="material-symbols-outlined fill text-yellow-400 text-lg">
                 star
               </span>
-              4.8
+              {product.rating || "4.8"}
             </span>
 
-            <span className="text-slate-500">(2,450 reviews)</span>
+            <span className="text-slate-500">({product.reviews || "2,450"} reviews)</span>
             <span className="text-slate-300">|</span>
             <span className="text-emerald-600 font-medium">In Stock</span>
           </div>
@@ -129,7 +121,9 @@ export default function ProductInfo({ dynamicProduct }) {
 
           {/* ❤️ Wishlist */}
           <button onClick={handleWishlist} title="Add to Wishlist">
-            <span className="text-red-500 text-xl leading-none">❤️</span>
+            <span className="text-red-500 text-xl leading-none">
+              {isInWishlist(product._id) ? "❤️" : "🤍"}
+            </span>
           </button>
         </div>
       </div>
@@ -141,19 +135,22 @@ export default function ProductInfo({ dynamicProduct }) {
         </h3>
 
         <ul className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12 text-sm text-slate-700">
-          {[
-            "Industry-leading noise cancellation",
-            "Up to 30-hour battery life",
-            "2x2 Beamforming Microphones",
-            "Speak-to-chat technology",
-            "Multipoint connection",
-            "Quick charging (3min for 3h)",
-          ].map((item) => (
-            <li key={item} className="flex items-center gap-3">
+          {(product.specifications && Object.keys(product.specifications).length > 0 
+            ? Object.entries(product.specifications).map(([key, val]) => `${key}: ${val}`)
+            : [
+              "Industry-leading noise cancellation",
+              "Up to 30-hour battery life",
+              "2x2 Beamforming Microphones",
+              "Speak-to-chat technology",
+              "Multipoint connection",
+              "Quick charging (min for 3h)",
+            ]
+          ).map((item, idx) => (
+            <li key={idx} className="flex items-center gap-3">
               <span className="material-symbols-outlined text-blue-600 text-lg">
                 check_circle
               </span>
-              {item}
+              <span className="line-clamp-1">{item}</span>
             </li>
           ))}
         </ul>

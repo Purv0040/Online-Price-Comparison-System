@@ -11,122 +11,28 @@ function generateProductImage(product) {
   
   // Working product images from reliable sources
   const realProductImages = {
-  // iPhones (Apple CDN - stable ✅)
-  'iphone 15 pro max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-max-finish-select-202309-6-7inch-naturaltitanium?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 15 pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch-bluetitanium?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 15': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-finish-select-202309-6-1inch-pink?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 15 plus': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-finish-select-202309-6-7inch-yellow?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 14 pro max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-max-finish-select-202209-6-7inch-deeppurple?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 14 pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-finish-select-202209-6-1inch-silver?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 14': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-finish-select-202209-6-1inch-blue?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 13': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-finish-select-202109-6-1inch-starlight?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 12': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-12-finish-select-202010-purple?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone 11': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-11-finish-select-201909-black?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone xr': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-xr-finish-select-201809-blue?wid=400&hei=400&fmt=png&qlt=70',
-  'iphone se': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-se-finish-select-202203-red?wid=400&hei=400&fmt=png&qlt=70',
-
-  // MacBooks
-  'macbook air': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-air-midnight-select-202206?wid=400&hei=400&fmt=png&qlt=70',
-  'macbook pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-pro-14-and-16-select-202301?wid=400&hei=400&fmt=png&qlt=70',
-
-  // iPads
-  'ipad pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-pro-11-select-wifi-spacegray-202210?wid=400&hei=400&fmt=png&qlt=70',
-  'ipad air': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-air-select-wifi-purple-202210?wid=400&hei=400&fmt=png&qlt=70',
-
-  // AirPods
-  'airpods pro': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-pro-2nd-gen-select-202209?wid=400&hei=400&fmt=png&qlt=70',
-  'airpods max': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-select-spacegray-202011?wid=400&hei=400&fmt=png&qlt=70',
-  'airpods': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-3rd-gen-select-202110?wid=400&hei=400&fmt=png&qlt=70',
-
-  // Apple Watch
-  'apple watch': 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/apple-watch-ultra-select-202209?wid=400&hei=400&fmt=png&qlt=70',
-
-  // Samsung (fixed to global CDN ✅)
-  'samsung galaxy s24': 'https://images.samsung.com/is/image/samsung/assets/global/galaxy-s24-ultra/gallery/01.png?$400_400_PNG$',
-  'samsung galaxy s23': 'https://images.samsung.com/is/image/samsung/assets/global/galaxy-s23-ultra/gallery/01.png?$400_400_PNG$',
-  'samsung galaxy tab': 'https://images.samsung.com/is/image/samsung/assets/global/galaxy-tab-s9/gallery/01.png?$400_400_PNG$',
-
-  // Nike (fixed stable SKUs ✅)
-  'nike air jordan': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/air-jordan-1-retro-high-og.png',
-  'nike air max': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/air-max-270.png',
-  'nike running': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/pegasus-40.png',
-  'nike shoes': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/air-max-270.png',
-  'nike sneakers': 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/pegasus-40.png',
-
-  // Levi's (already correct ✅)
-  "levi's 501": 'https://lsco.scene7.com/is/image/lsco/levis/005040100-front-pdp?fmt=png&qlt=70&wid=400&hei=400',
-  "levi's jeans": 'https://lsco.scene7.com/is/image/lsco/levis/005040100-front-pdp?fmt=png&qlt=70&wid=400&hei=400',
-
-  // Sony (FIXED ❗ your URLs were broken)
-  'sony headphones': 'https://www.sony.co.in/image/5d02da5df552836db894e5e4c2c9c2b1?fmt=png-alpha&wid=400',
-  'sony camera': 'https://www.sony.co.in/image/9b0e7d0e7b3d4a9c8c3d6a1a3b1c1f2a?fmt=png-alpha&wid=400'
-};
+  // iPhones
+  'iphone 15 pro max': 'https://photos.app.goo.gl/random1', // Placeholder or real
+  'iphone 15 pro': 'https://photos.app.goo.gl/random2',
+  'sony wh-1000xm5': 'https://www.sony.co.in/image/5d02da5df552836db894e5e4c2c9c2b1?fmt=png-alpha&wid=400',
+  'macbook air': 'https://www.apple.com/v/macbook-air/q/images/overview/design/design_m3_midnight__ekyghz2of86q_large.jpg'
+  };
 
   const titleLower = title.toLowerCase();
   
-  // Check for exact product matches first
-  for (const [productKey, imageUrl] of Object.entries(realProductImages)) {
-    if (titleLower.includes(productKey)) {
-      return imageUrl;
-    }
+  // Map keywords to loremflickr for high-quality variety
+  const tagsStr = tags ? tags.join(',') : category;
+  return `https://loremflickr.com/600/600/${encodeURIComponent(tagsStr.split(',')[0] || category)}?lock=${Math.abs(hashString(title))}`;
+}
+
+// Simple hash function for consistent images
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
   }
-  
-  // Fallback to category-specific but reliable images
-  const categoryImageMap = {
-  
-const categoryImages = {
-  'Electronics': {
-    keywords: {
-      'laptop': 'https://source.unsplash.com/400x400/?laptop',
-      'headphones': 'https://source.unsplash.com/400x400/?headphones',
-      'watch': 'https://source.unsplash.com/400x400/?smartwatch',
-      'camera': 'https://source.unsplash.com/400x400/?camera',
-      'tablet': 'https://source.unsplash.com/400x400/?tablet',
-      'phone': 'https://source.unsplash.com/400x400/?smartphone'
-    },
-    default: 'https://source.unsplash.com/400x400/?electronics,gadget'
-  },
-
-  'Fashion': {
-    keywords: {
-      'shoes': 'https://source.unsplash.com/400x400/?shoes',
-      'jeans': 'https://source.unsplash.com/400x400/?jeans',
-      'jacket': 'https://source.unsplash.com/400x400/?jacket',
-      'shirt': 'https://source.unsplash.com/400x400/?shirt'
-    },
-    default: 'https://source.unsplash.com/400x400/?fashion,clothing'
-  },
-
-  'Home': {
-    keywords: {
-      'blender': 'https://source.unsplash.com/400x400/?blender',
-      'vacuum': 'https://source.unsplash.com/400x400/?vacuum-cleaner',
-      'coffee': 'https://source.unsplash.com/400x400/?coffee-maker'
-    },
-    default: 'https://source.unsplash.com/400x400/?home,kitchen'
-  },
-
-  'Sports': {
-    keywords: {
-      'ball': 'https://source.unsplash.com/400x400/?sports-ball',
-      'basketball': 'https://source.unsplash.com/400x400/?basketball',
-      'fitness': 'https://source.unsplash.com/400x400/?fitness'
-    },
-    default: 'https://source.unsplash.com/400x400/?sports,fitness'
-  }
-};
-
-  const categoryMap = categoryImageMap[category] || categoryImageMap['Electronics'];
-  
-  // Find matching keyword in category
-  for (const [keyword, imageUrl] of Object.entries(categoryMap.keywords)) {
-    if (titleLower.includes(keyword)) {
-      return imageUrl;
-    }
-  }
-  
-  // Use category default
-  return categoryMap.default;
+  return hash;
 }
 
 // Sample product data with 100+ realistic products
@@ -1254,12 +1160,16 @@ const sampleProducts = [
   }
 ];
 
-// Sample sellers
+// Sample sellers with categorized specialties
 const sellers = [
-  { name: "Amazon", platform: "amazon", baseUrl: "amazon.com", isTrusted: true },
-  { name: "Best Buy", platform: "other", baseUrl: "bestbuy.com", isTrusted: true },
-  { name: "Target", platform: "other", baseUrl: "target.com", isTrusted: true },
-  { name: "Walmart", platform: "other", baseUrl: "walmart.com", isTrusted: true },
+  { name: "Amazon", platform: "amazon", baseUrl: "amazon.com", isTrusted: true, category: "Generic" },
+  { name: "Walmart", platform: "other", baseUrl: "walmart.com", isTrusted: true, category: "Generic" },
+  { name: "Best Buy", platform: "other", baseUrl: "bestbuy.com", isTrusted: true, category: "Electronics" },
+  { name: "Croma", platform: "other", baseUrl: "croma.com", isTrusted: true, category: "Electronics" },
+  { name: "Myntra", platform: "other", baseUrl: "myntra.com", isTrusted: true, category: "Fashion" },
+  { name: "AJIO", platform: "other", baseUrl: "ajio.com", isTrusted: true, category: "Fashion" },
+  { name: "Target", platform: "other", baseUrl: "target.com", isTrusted: true, category: "Home" },
+  { name: "Barnes & Noble", platform: "other", baseUrl: "barnesandnoble.com", isTrusted: true, category: "Books" },
 ];
 
 // Price ranges by category
@@ -1313,30 +1223,45 @@ async function seedDatabase() {
 
       const savedProduct = await product.save();
       
-      // Create price with random seller
-      const randomSeller = insertedSellers[Math.floor(Math.random() * insertedSellers.length)];
-      const priceRecord = new Price({
-        product: savedProduct._id,
-        seller: randomSeller._id,
-        price: price,
-        originalPrice: originalPrice,
-        discount: Math.round(((originalPrice - price) / originalPrice) * 100),
-        url: productData.originalUrl,
-        rating: savedProduct.rating,
-        reviews: savedProduct.reviews,
-      });
+      // Filter sellers assigned to this category or "Generic"
+      const appropriateSellers = insertedSellers.filter(s => 
+        s.category === productData.category || s.category === "Generic"
+      );
 
-      await priceRecord.save();
+      // Create prices for 1-3 appropriate sellers
+      const numToCreate = Math.min(appropriateSellers.length, Math.floor(Math.random() * 2) + 1);
+      const shuffledSellers = [...appropriateSellers].sort(() => 0.5 - Math.random());
+      const selectedSellers = shuffledSellers.slice(0, numToCreate);
 
-      // Create price history
-      const priceHistory = new PriceHistory({
-        product: savedProduct._id,
-        seller: randomSeller._id,
-        price: price,
-        discount: Math.round(((originalPrice - price) / originalPrice) * 100),
-      });
+      for (const seller of selectedSellers) {
+        // Vary price slightly per seller
+        const variance = 0.95 + Math.random() * 0.1; // 0.95 to 1.05
+        const sellerPrice = Math.round(price * variance);
+        const sellerOriginalPrice = Math.round(originalPrice * variance);
 
-      await priceHistory.save();
+        const priceRecord = new Price({
+          product: savedProduct._id,
+          seller: seller._id,
+          price: sellerPrice,
+          originalPrice: sellerOriginalPrice,
+          discount: Math.round(((sellerOriginalPrice - sellerPrice) / sellerOriginalPrice) * 100),
+          url: productData.originalUrl,
+          rating: savedProduct.rating,
+          reviews: savedProduct.reviews,
+        });
+
+        await priceRecord.save();
+
+        // Create price history
+        const priceHistory = new PriceHistory({
+          product: savedProduct._id,
+          seller: seller._id,
+          price: sellerPrice,
+          discount: Math.round(((sellerOriginalPrice - sellerPrice) / sellerOriginalPrice) * 100),
+        });
+
+        await priceHistory.save();
+      }
 
       productsWithPrices.push({
         ...savedProduct.toObject(),
@@ -1344,7 +1269,7 @@ async function seedDatabase() {
       });
     }
 
-    console.log(`Inserted ${sampleProducts.length} products with prices`);
+    console.log(`Inserted ${sampleProducts.length} products with category-specific prices`);
 
     // Test search functionality
     console.log('\n🔍 Testing search functionality:');

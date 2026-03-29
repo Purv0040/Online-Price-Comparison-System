@@ -56,4 +56,15 @@ export const searchProducts = async (query, filters = {}) => {
   }
 };
 
+// Get Product Details API
+export const getProductDetails = async (productId) => {
+  try {
+    const response = await apiClient.get(`/products/${productId}`);
+    return response;
+  } catch (error) {
+    console.error('Get Product Details API error:', error);
+    throw error;
+  }
+};
+
 export default apiClient;

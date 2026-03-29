@@ -1,27 +1,27 @@
 import { Link, useSearchParams } from "react-router-dom"
 
-export default function Breadcrumbs({ dynamicProduct }) {
+export default function Breadcrumbs({ productTitle }) {
   const [searchParams] = useSearchParams()
 
-  const category = searchParams.get("category") || dynamicProduct?.category || "Electronics"
-  const subcategory = searchParams.get("subcategory") || dynamicProduct?.subcategory
+  const category = searchParams.get("category")
+  const subcategory = searchParams.get("subcategory")
 
   return (
     <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6 flex-wrap">
 
       {/* Home */}
-      <Link to="/" className="hover:text-slate-900">
+      <Link to="/" className="hover:text-slate-900 transition-colors">
         Home
       </Link>
 
       {/* Category */}
-      {category && (
+      {(category || subcategory) && (
         <>
           <span className="material-symbols-outlined text-xs">
             chevron_right
           </span>
-          <span className="hover:text-slate-900 capitalize">
-            {category}
+          <span className="hover:text-slate-900 cursor-pointer">
+            {category || "Electronics"}
           </span>
         </>
       )}
@@ -32,20 +32,20 @@ export default function Breadcrumbs({ dynamicProduct }) {
           <span className="material-symbols-outlined text-xs">
             chevron_right
           </span>
-          <span className="hover:text-slate-900 capitalize">
+          <span className="hover:text-slate-900 cursor-pointer">
             {subcategory}
           </span>
         </>
       )}
 
-      {/* Product Name */}
-      {dynamicProduct && (
+      {/* Product Title */}
+      {productTitle && (
         <>
           <span className="material-symbols-outlined text-xs">
             chevron_right
           </span>
-          <span className="font-medium text-slate-900 truncate max-w-[300px]" title={dynamicProduct.name}>
-            {dynamicProduct.name}
+          <span className="font-medium text-slate-900 line-clamp-1 max-w-[200px]">
+            {productTitle}
           </span>
         </>
       )}
