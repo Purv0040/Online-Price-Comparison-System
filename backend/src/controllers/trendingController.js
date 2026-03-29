@@ -33,7 +33,15 @@ exports.getTrendingProducts = async (req, res, next) => {
 // @access  Public
 exports.getTrendingProductById = async (req, res, next) => {
   try {
-    const product = await TrendingProduct.findById(req.params.id);
+    const { id } = req.params;
+    
+    // Try to find by _id first, then by productRef
+    let product = await TrendingProduct.findById(id);
+    
+    if (!product) {
+       product = await TrendingProduct.findOne({ productRef: id });
+    }
+
     if (!product) {
       return res.status(404).json({ success: false, message: 'Trending product not found' });
     }

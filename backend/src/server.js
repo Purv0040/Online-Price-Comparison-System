@@ -13,6 +13,7 @@ const priceAlertRoutes = require('./routes/priceAlertRoutes');
 const bulkOrderRoutes = require('./routes/bulkOrderRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const trendingRoutes = require('./routes/trendingRoutes');
+const scraperRoutes = require('./routes/scraperRoutes');
 
 // Scheduler
 const { schedulePriceAlerts, schedulePriceUpdates } = require('./utils/scheduler');
@@ -45,6 +46,7 @@ app.use('/api/price-alerts', priceAlertRoutes);
 app.use('/api/bulk-orders', bulkOrderRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/trending', trendingRoutes);
+app.use('/api/scraper', scraperRoutes);
 
 // Root route - List all available routes
 app.get('/', (req, res) => {

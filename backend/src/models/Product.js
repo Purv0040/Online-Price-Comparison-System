@@ -60,6 +60,16 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    lastUpdated: {
+      type: Date,
+      default: Date.now,
+    },
+    priceHistory: [
+      {
+        price: Number,
+        date: { type: Date, default: Date.now }
+      }
+    ],
   },
   { timestamps: true }
 );
