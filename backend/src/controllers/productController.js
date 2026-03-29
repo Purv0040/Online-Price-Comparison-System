@@ -142,19 +142,21 @@ const getProductDetails = async (req, res) => {
 // Search products
 const searchProducts = async (req, res) => {
   try {
+    const startTime = Date.now();
     const { query, category, minPrice, maxPrice, page = 1, limit = 20 } = req.query;
 
-    const filter = { isActive: true };
-    
-    // Category filter
+    const skipValue = (parseInt(page) - 1) * parseInt(limit);
+    const limitValue = parseInt(limit);
+
+    // Initial match stage for basic filters (isActive, category, query)
+    const matchStage = { isActive: true };
     if (category) {
-      filter.category = category;
+      matchStage.category = category;
     }
 
-    // Enhanced search logic with case-insensitive and partial matching
     if (query) {
-      const searchRegex = new RegExp(query, 'i'); // Case-insensitive regex
-      filter.$or = [
+      const searchRegex = new RegExp(query, 'i');
+      matchStage.$or = [
         { title: { $regex: searchRegex } },
         { brand: { $regex: searchRegex } },
         { category: { $regex: searchRegex } },
@@ -162,43 +164,67 @@ const searchProducts = async (req, res) => {
       ];
     }
 
-    const products = await Product.find(filter)
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .sort({ rating: -1, createdAt: -1 });
+    console.log(`Starting optimized search for "${query || 'all'}"...`);
 
-    const total = await Product.countDocuments(filter);
+    // Aggregation pipeline for performance
+    const pipeline = [
+      { $match: matchStage },
+      // Look up lowest price
+      {
+        $lookup: {
+          from: 'prices',
+          let: { productId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$product', '$$productId'] } } },
+            { $sort: { price: 1 } },
+            { $limit: 1 },
+            { $project: { price: 1 } }
+          ],
+          as: 'priceInfo'
+        }
+      },
+      {
+        $addFields: {
+          lowestPrice: { $arrayElemAt: ['$priceInfo.price', 0] }
+        }
+      },
+      { $project: { priceInfo: 0 } }
+    ];
 
-    let productsWithPrices = [];
-
-    for (const product of products) {
-      const prices = await Price.find({ product: product._id })
-        .sort({ price: 1 })
-        .limit(1);
-
-      productsWithPrices.push({
-        ...product.toObject(),
-        lowestPrice: prices[0]?.price || null,
-      });
-    }
-
-    // Price filtering after getting lowest prices
+    // Price filtering in pipeline
     if (minPrice || maxPrice) {
-      productsWithPrices = productsWithPrices.filter((p) => {
-        const price = p.lowestPrice || 0;
-        if (minPrice && price < minPrice) return false;
-        if (maxPrice && price > maxPrice) return false;
-        return true;
-      });
+      const priceFilter = {};
+      if (minPrice) priceFilter.$gte = parseFloat(minPrice);
+      if (maxPrice) priceFilter.$lte = parseFloat(maxPrice);
+      pipeline.push({ $match: { lowestPrice: priceFilter } });
     }
+
+    // Sort, skip, limit
+    pipeline.push({ $sort: { rating: -1, createdAt: -1 } });
+    
+    // Fork the pipeline to get both paginated results and total count
+    const [results] = await Product.aggregate([
+      {
+        $facet: {
+          paginatedResults: [...pipeline, { $skip: skipValue }, { $limit: limitValue }],
+          totalCount: [...pipeline, { $count: 'count' }]
+        }
+      }
+    ]);
+
+    const products = results.paginatedResults;
+    const total = results.totalCount[0]?.count || 0;
+
+    const duration = Date.now() - startTime;
+    console.log(`✅ Optimized search completed in ${duration}ms. Found ${total} products (showing ${products.length}).`);
 
     sendResponse(res, 200, true, 'Products fetched', {
-      products: productsWithPrices,
+      products,
       pagination: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limitValue),
       },
     });
   } catch (error) {

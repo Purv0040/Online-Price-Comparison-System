@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
-import { searchProducts } from "../services/api";
+import apiClient from "../services/api";
 import SearchNavbar from "../components/navbars/SearchNavbar";
 import SearchFooter from "../components/footers/SearchFooter";
 
@@ -41,39 +41,46 @@ export default function SearchResults() {
       setLoading(true);
       setError(null);
 
-      const filters = {
-        category: selectedCategories.length > 0 ? selectedCategories[0] : undefined,
-        minPrice: priceRange[0],
-        maxPrice: priceRange[1],
-        page: currentPage,
-        limit: itemsPerPage
-      };
-
-      const response = await searchProducts(searchQuery, filters);
+      // Fetch the 60 products we just added to the TrendingProduct table
+      const response = await apiClient.get('/trending');
       
       if (response.success) {
-        // Transform API data to match frontend format
-        const transformedProducts = response.data.products.map(product => ({
+        // We received the new products exactly as modeled, let's map them to work with SearchResult's filters
+        let transformedProducts = response.data.map((product, i) => ({
           _id: product._id,
           id: product._id,
           brand: product.brand || 'Unknown',
-          name: product.title,
-          category: product.category,
-          price: `₹${product.lowestPrice || 0}`,
-          priceNumber: product.lowestPrice || 0,
-          oldPrice: product.lowestPrice ? `₹${Math.round(product.lowestPrice * 1.2)}` : '₹0',
-          sites: `Available on ${Math.floor(Math.random() * 10) + 1} sites`,
-          badge: product.lowestPrice ? `${Math.floor(Math.random() * 30) + 10}% OFF` : 'NEW',
+          name: product.name,
+          category: 'Electronics', // fallback since trending doesn't have category saved
+          price: product.price, // Format is '$999.00'
+          priceNumber: Number(product.price.replace(/[^0-9.-]+/g, "")), // Extract pure number for price slider logic
+          oldPrice: '',
+          sites: product.stores,
+          badge: product.badge || '',
+          badgeColor: product.badgeColor || 'bg-gray-500',
           inStock: true,
-          image: product.image || `https://picsum.photos/seed/${product._id}/400/400`,
-          rating: product.rating || 0,
-          reviews: product.reviews || 0
+          image: product.image,
+          rating: 4.5,
+          reviews: 10
         }));
 
+        // Handle text search dynamically on the client since we fetch all 60 trending products
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          transformedProducts = transformedProducts.filter(p => 
+            p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)
+          );
+        }
+
         setProducts(transformedProducts);
-        setPagination(response.data.pagination);
+        setPagination({
+          total: transformedProducts.length,
+          page: 1,
+          limit: itemsPerPage,
+          totalPages: Math.ceil(transformedProducts.length / itemsPerPage)
+        });
       } else {
-        setError(response.message || 'Failed to fetch products');
+        setError('Failed to fetch products');
       }
     } catch (err) {
       console.error('Search error:', err);
@@ -122,11 +129,7 @@ export default function SearchResults() {
 
   // Fetch on component mount and when dependencies change
   useEffect(() => {
-    if (searchQuery) {
-      fetchProducts();
-    } else {
-      setLoading(false);
-    }
+    fetchProducts();
   }, [searchQuery, selectedCategories, selectedBrands, inStockOnly, priceRange, currentPage]);
 
   // Reset page when filters change
@@ -161,19 +164,6 @@ export default function SearchResults() {
             >
               Try Again
             </button>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  if (!searchQuery) {
-    return (
-      <>
-        <SearchNavbar />
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-10 py-8">
-          <div className="text-center py-20">
-            <p className="text-gray-600">Please enter a search term to find products.</p>
           </div>
         </div>
       </>
