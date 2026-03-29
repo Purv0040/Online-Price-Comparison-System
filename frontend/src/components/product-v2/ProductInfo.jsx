@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { useWishlist } from "../../context/WishlistContext"
 
-export default function ProductInfo() {
+export default function ProductInfo({ dynamicProduct }) {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const { addToWishlist, isInWishlist } = useWishlist()
 
-  const product = {
+  const product = dynamicProduct || {
     _id: "prod_sony_wh1000xm5",
     id: "prod_sony_wh1000xm5",
     name: "Sony WH-1000XM5 Wireless Noise Cancelling Headphones",

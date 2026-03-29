@@ -1,4 +1,4 @@
-export default function BestPriceBox({ seller, status }) {
+export default function BestPriceBox({ seller, status, dynamicPrice }) {
   if (!seller) return null
 
   const statusMap = {
@@ -36,7 +36,7 @@ export default function BestPriceBox({ seller, status }) {
 
           <div className="flex items-baseline gap-3">
             <span className="text-[32px] font-black text-slate-900">
-              {seller.price}
+              {dynamicPrice || seller.price}
             </span>
           </div>
 

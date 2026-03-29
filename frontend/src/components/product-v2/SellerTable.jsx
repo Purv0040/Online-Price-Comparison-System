@@ -1,13 +1,21 @@
 import sellers from "../../data/productV2/sellers"
 
-export default function SellerTable({ onSelectSeller, selectedSeller }) {
+export default function SellerTable({ onSelectSeller, selectedSeller, dynamicPrice }) {
   const getPriceNumber = (price) => {
     if (!price) return 0;
     if (typeof price === 'number') return price;
     return Number(String(price).replace(/[^0-9.]/g, ""));
   };
 
-  const prices = sellers.map((s) => getPriceNumber(s.price))
+  // Modify the static sellers array dynamically using the actual product price
+  const activeSellers = sellers.map((s, i) => {
+    if (i === 0 && dynamicPrice) {
+      return { ...s, price: dynamicPrice };
+    }
+    return s;
+  });
+
+  const prices = activeSellers.map((s) => getPriceNumber(s.price))
   const minPrice = Math.min(...prices)
   const maxPrice = Math.max(...prices)
 
@@ -37,7 +45,7 @@ export default function SellerTable({ onSelectSeller, selectedSeller }) {
         </thead>
 
         <tbody>
-          {sellers.map((s, i) => {
+          {activeSellers.map((s, i) => {
             const label = getLabel(s.price)
             const isSelected = selectedSeller?.name === s.name
 

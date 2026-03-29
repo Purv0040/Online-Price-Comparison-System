@@ -1,13 +1,13 @@
 import { Link, useSearchParams } from "react-router-dom"
 
-export default function Breadcrumbs() {
+export default function Breadcrumbs({ dynamicProduct }) {
   const [searchParams] = useSearchParams()
 
-  const category = searchParams.get("category")
-  const subcategory = searchParams.get("subcategory")
+  const category = searchParams.get("category") || dynamicProduct?.category || "Electronics"
+  const subcategory = searchParams.get("subcategory") || dynamicProduct?.subcategory
 
   return (
-    <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6">
+    <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6 flex-wrap">
 
       {/* Home */}
       <Link to="/" className="hover:text-slate-900">
@@ -20,7 +20,7 @@ export default function Breadcrumbs() {
           <span className="material-symbols-outlined text-xs">
             chevron_right
           </span>
-          <span className="hover:text-slate-900">
+          <span className="hover:text-slate-900 capitalize">
             {category}
           </span>
         </>
@@ -32,8 +32,20 @@ export default function Breadcrumbs() {
           <span className="material-symbols-outlined text-xs">
             chevron_right
           </span>
-          <span className="font-medium text-slate-900">
+          <span className="hover:text-slate-900 capitalize">
             {subcategory}
+          </span>
+        </>
+      )}
+
+      {/* Product Name */}
+      {dynamicProduct && (
+        <>
+          <span className="material-symbols-outlined text-xs">
+            chevron_right
+          </span>
+          <span className="font-medium text-slate-900 truncate max-w-[300px]" title={dynamicProduct.name}>
+            {dynamicProduct.name}
           </span>
         </>
       )}

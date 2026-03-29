@@ -27,3 +27,35 @@ exports.getTrendingProducts = async (req, res, next) => {
     next(err);
   }
 };
+
+// @desc    Get single trending product
+// @route   GET /api/trending/:id
+// @access  Public
+exports.getTrendingProductById = async (req, res, next) => {
+  try {
+    const product = await TrendingProduct.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Trending product not found' });
+    }
+    
+    // format it just like the array
+    const formatted = {
+      _id: product.productRef || product._id,
+      id: product.productRef || product._id,
+      brand: product.brand,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      badge: product.badge,
+      badgeColor: product.badgeColor,
+      stores: product.stores,
+    };
+
+    res.status(200).json({
+      success: true,
+      data: formatted,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
