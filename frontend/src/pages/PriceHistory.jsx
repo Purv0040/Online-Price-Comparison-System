@@ -1,44 +1,109 @@
+import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import PriceHistoryNavbar from "../components/navbars/PriceHistoryNavbar"
 import PriceHistoryFooter from "../components/footers/PriceHistoryFooter"
 import ProductHeader from "../components/priceHistory/ProductHeader"
+import Breadcrumbs from "../components/product-v2/Breadcrumbs"
 import RangeSelector from "../components/priceHistory/RangeSelector"
 import PriceChart from "../components/priceHistory/PriceChart"
 import InsightsSidebar from "../components/priceHistory/InsightsSidebar"
-import sellers from "../data/productV2/sellers"
+import { getProductDetails } from "../services/api";
 
-export default function PriceHistory({ seller }) {
-  // ✅ Use selected seller if provided, otherwise fallback to first seller
-  const activeSeller = seller || sellers[0]
+export default function PriceHistory() {
+  const { id } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [product, setProduct] = useState(null);
+  const [priceHistory, setPriceHistory] = useState([]);
+  const [stats, setStats] = useState({});
+  const [activeSeller, setActiveSeller] = useState(null);
 
-  const history = activeSeller?.history || [
-    { date: "Oct 20", price: 360 },
-    { date: "Oct 27", price: 355 },
-    { date: "Nov 03", price: 352 },
-    { date: "Nov 10", price: 349 },
-    { date: "Nov 17", price: 348 },
-    { date: "Nov 24", price: 348 }
-  ]
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await getProductDetails(id);
+        if (response.success) {
+          const { product, prices, priceHistory, stats } = response.data;
+          setProduct(product);
+          setPriceHistory(priceHistory);
+          setStats(stats);
+          
+          // Current best seller or first one
+          if (prices && prices.length > 0) {
+            const bestSeller = prices.reduce((prev, curr) => 
+              (prev.price < curr.price) ? prev : curr
+            );
+            setActiveSeller({
+              ...bestSeller,
+              product // Attach product info for components that expect it
+            });
+          }
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching price history:", err);
+        setError("Failed to load price history. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-500 font-medium italic">Analyzing price trends...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200 text-center max-w-md">
+          <span className="material-symbols-outlined text-red-500 text-6xl mb-4">error</span>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Oops!</h2>
+          <p className="text-slate-600 mb-6">{error || "Product not found"}</p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   
   return (
-    <>
+    <div className="min-h-screen bg-[#fcfdff] flex flex-col">
       <PriceHistoryNavbar />
 
-      <main className="max-w-[1280px] mx-auto px-6 py-8">
-        <ProductHeader product={activeSeller.product} />
+      <main className="flex-1 max-w-7xl mx-auto px-4 lg:px-10 py-8">
+        <Breadcrumbs product={product} type="history" />
+        <ProductHeader product={product} stats={stats} />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-8">
             <RangeSelector />
-            <PriceChart history={history} />
+            <PriceChart history={priceHistory} stats={stats} />
           </div>
 
-          {/* ✅ PASS ACTIVE SELLER */}
-          <InsightsSidebar seller={activeSeller} />
+          <aside className="space-y-6">
+            <InsightsSidebar seller={activeSeller} stats={stats} />
+          </aside>
         </div>
       </main>
 
       <PriceHistoryFooter />
-    </>
+    </div>
   )
 }

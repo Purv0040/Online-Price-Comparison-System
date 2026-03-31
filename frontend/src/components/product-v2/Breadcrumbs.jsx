@@ -1,52 +1,87 @@
-import { Link, useSearchParams } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
-export default function Breadcrumbs({ productTitle }) {
-  const [searchParams] = useSearchParams()
-
-  const category = searchParams.get("category")
-  const subcategory = searchParams.get("subcategory")
+export default function Breadcrumbs({ product, type = "product", query = "" }) {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  
+  // Possible sources: search, category, or generic
+  const from = searchParams.get("from") || (location.pathname.includes("/search") ? "search" : "");
+  const urlQuery = searchParams.get("q") || query;
 
   return (
-    <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6 flex-wrap">
-
+    <nav className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.1em] mb-8 bg-white/50 backdrop-blur-sm self-start px-4 py-2 rounded-full border border-slate-100 flex-wrap">
       {/* Home */}
-      <Link to="/" className="hover:text-slate-900 transition-colors">
+      <Link 
+        to="/" 
+        className="text-slate-400 hover:text-blue-600 transition-all flex items-center"
+      >
         Home
       </Link>
 
-      {/* Category */}
-      {(category || subcategory) && (
+      <span className="material-symbols-outlined text-slate-300 text-[12px] opacity-50">
+        chevron_right
+      </span>
+
+      {/* Path Logic */}
+      {type === "search" ? (
         <>
-          <span className="material-symbols-outlined text-xs">
+          <span className="text-slate-400">Search Results</span>
+          <span className="material-symbols-outlined text-slate-300 text-[12px] opacity-50">
             chevron_right
           </span>
-          <span className="hover:text-slate-900 cursor-pointer">
-            {category || "Electronics"}
+          <span className="text-blue-600">"{urlQuery}"</span>
+        </>
+      ) : from === "search" ? (
+        <>
+          <Link to={`/search?q=${urlQuery}`} className="text-slate-400 hover:text-blue-600 transition-colors">
+            Search: {urlQuery}
+          </Link>
+          <span className="material-symbols-outlined text-slate-300 text-[12px] opacity-50">
+            chevron_right
           </span>
+          <span className={type === "history" ? "text-slate-400" : "text-blue-600"}>
+            {product?.title || "Product"}
+          </span>
+        </>
+      ) : (
+        <>
+          <Link to="/category" className="text-slate-400 hover:text-blue-600 transition-all">
+            Categories
+          </Link>
+          
+          {(product?.category || product?.title) && (
+            <>
+              <span className="material-symbols-outlined text-slate-300 text-[12px] opacity-50">
+                chevron_right
+              </span>
+              <Link 
+                to={`/category/${product?.category?.toLowerCase() || 'all'}`} 
+                className="text-slate-400 hover:text-blue-600 transition-all"
+              >
+                {product?.category || "General"}
+              </Link>
+            </>
+          )}
+
+          {product?.title && (
+            <>
+              <span className="material-symbols-outlined text-slate-300 text-[12px] opacity-50">
+                chevron_right
+              </span>
+              <span className={type === "history" ? "text-slate-400" : "text-blue-600"}>
+                {product.title}
+              </span>
+            </>
+          )}
         </>
       )}
 
-      {/* Subcategory */}
-      {subcategory && (
+      {type === "history" && (
         <>
-          <span className="material-symbols-outlined text-xs">
+          <span className="material-symbols-outlined text-slate-300 text-[12px] opacity-50">
             chevron_right
           </span>
-          <span className="hover:text-slate-900 cursor-pointer">
-            {subcategory}
-          </span>
-        </>
-      )}
-
-      {/* Product Title */}
-      {productTitle && (
-        <>
-          <span className="material-symbols-outlined text-xs">
-            chevron_right
-          </span>
-          <span className="font-medium text-slate-900 line-clamp-1 max-w-[200px]">
-            {productTitle}
-          </span>
+          <span className="text-blue-600">Price History</span>
         </>
       )}
     </nav>

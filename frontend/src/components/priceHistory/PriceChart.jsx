@@ -5,7 +5,8 @@ import {
   CategoryScale,
   LinearScale,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 } from "chart.js"
 import { Line } from "react-chartjs-2"
 
@@ -16,48 +17,50 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 )
 
-export default function PriceChart({ history = [] }) {
-  // history example:
-  // [
-  //   { date: "Oct 20", price: 360 },
-  //   { date: "Oct 27", price: 355 },
-  //   { date: "Nov 03", price: 352 },
-  //   { date: "Nov 10", price: 349 },
-  //   { date: "Nov 17", price: 348 },
-  //   { date: "Nov 24", price: 348 }
-  // ]
+export default function PriceChart({ history = [], stats = {} }) {
+  const labels = history.length > 0 ? history.map(h => h.date) : ["Oct 20", "Oct 27", "Nov 03", "Nov 10", "Nov 17", "Nov 24"]
+  const prices = history.length > 0 ? history.map(h => h.price) : [360, 355, 352, 349, 348, 348]
 
-  const labels = history.map(h => h.date)
-  const prices = history.map(h => h.price)
-
-  const avg =
+  const avg = stats?.averagePrice || (
     prices.length > 0
       ? prices.reduce((a, b) => a + b, 0) / prices.length
       : 0
+  )
 
   const data = {
     labels,
     datasets: [
       {
-        label: "Price",
+        label: "Price History",
         data: prices,
-        borderColor: "#2563eb", // blue-600
-        backgroundColor: "rgba(37,99,235,0.1)",
+        borderColor: "#2563eb",
+        backgroundColor: (context) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, "rgba(37, 99, 235, 0.2)");
+          gradient.addColorStop(1, "rgba(37, 99, 235, 0)");
+          return gradient;
+        },
         tension: 0.4,
-        pointRadius: 4,
+        pointRadius: 6,
+        pointHoverRadius: 8,
         pointBackgroundColor: "#2563eb",
-        fill: true
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+        fill: true,
       },
       {
-        label: "Average",
+        label: "Average Price",
         data: prices.map(() => avg),
-        borderColor: "#cbd5e1", // slate-300
-        borderDash: [6, 6],
+        borderColor: "#94a3b8",
+        borderDash: [5, 5],
         pointRadius: 0,
-        tension: 0.4
+        fill: false,
+        borderWidth: 2
       }
     ]
   }
@@ -66,18 +69,38 @@ export default function PriceChart({ history = [] }) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false }
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0f172a',
+        padding: 12,
+        titleFont: { size: 14, weight: 'bold' },
+        bodyFont: { size: 13 },
+        callbacks: {
+          label: (context) => ` ₹${context.raw.toLocaleString('en-IN')}`
+        }
+      }
+    },
+    hover: {
+      mode: 'index',
+      intersect: false
     },
     scales: {
       y: {
+        beginAtZero: false,
         ticks: {
-          callback: value => `$${value}`
+          callback: value => `₹${value.toLocaleString('en-IN')}`,
+          color: "#64748b",
+          font: { weight: '600' }
         },
         grid: {
-          color: "#eef2ff"
+          color: "#f1f5f9"
         }
       },
       x: {
+        ticks: {
+          color: "#64748b",
+          font: { weight: '600' }
+        },
         grid: {
           display: false
         }
@@ -86,33 +109,32 @@ export default function PriceChart({ history = [] }) {
   }
 
   return (
-    <div className="bg-white border border-[#e7ebf3] rounded-xl p-8 shadow-sm h-[480px]">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+    <div className="bg-white border border-[#e7ebf3] rounded-[2.5rem] p-8 shadow-sm">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-4">
         <div>
-          <h3 className="text-lg font-bold">Historical Trend</h3>
-          <p className="text-sm text-[#4d6599]">
-            Price volatility over the last 30 days
+          <h3 className="text-xl font-black text-[#0e121b]">Historical Price Trend</h3>
+          <p className="text-sm text-[#4d6599] font-medium mt-1">
+            Visualizing price fluctuations over the tracking period
           </p>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-[#4d6599]">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-blue-600 rounded-full" />
-            Price
+        <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em]">
+          <div className="flex items-center gap-2 text-blue-600">
+            <span className="w-3 h-3 bg-blue-600 rounded-full" />
+            Current Price
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-slate-300 rounded-full" />
-            Avg.
+          <div className="flex items-center gap-2 text-slate-400">
+            <span className="w-3 h-3 border-2 border-slate-400 border-dashed rounded-full" />
+            Rolling Average
           </div>
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="relative h-64 w-full">
-        {history.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-slate-400 text-sm">
-            No price history available
+      <div className="h-[400px] w-full">
+        {history.length === 0 && !prices.length ? (
+          <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-4">
+            <span className="material-symbols-outlined text-5xl opacity-20">insights</span>
+            <p className="font-bold">No history records found for this product</p>
           </div>
         ) : (
           <Line data={data} options={options} />

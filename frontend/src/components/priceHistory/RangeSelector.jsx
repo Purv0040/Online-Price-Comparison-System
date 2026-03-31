@@ -5,64 +5,42 @@ export default function RangeSelector() {
   const [activeRange, setActiveRange] = useState("6M")
   const [showExport, setShowExport] = useState(false)
 
-  // Dummy data for export (you can replace with real price history data)
-  const data = [
-    { date: "2025-01-01", price: 320 },
-    { date: "2025-02-01", price: 340 },
-    { date: "2025-03-01", price: 330 },
-    { date: "2025-04-01", price: 350 },
+  // Demo data for export
+  const exportData = [
+    { date: "2025-01-01", price: 32000 },
+    { date: "2025-02-01", price: 34000 },
+    { date: "2025-03-01", price: 33000 },
+    { date: "2025-04-01", price: 35000 },
   ]
-
-  // Convert data to CSV
-  const exportCSV = () => {
-    const header = "Date,Price\n"
-    const rows = data.map(d => `${d.date},${d.price}`).join("\n")
-    const csvContent = header + rows
-
-    downloadFile(csvContent, "price-history.csv", "text/csv")
-  }
-
-  // Simple Excel export (CSV but with .xlsx name for demo)
-  const exportExcel = () => {
-    const header = "Date\tPrice\n"
-    const rows = data.map(d => `${d.date}\t${d.price}`).join("\n")
-    const content = header + rows
-
-    downloadFile(content, "price-history.xlsx", "application/vnd.ms-excel")
-  }
-
-  // Simple PDF export (text-based demo)
-  const exportPDF = () => {
-    const content = data.map(d => `${d.date} : ${d.price}`).join("\n")
-    downloadFile(content, "price-history.pdf", "application/pdf")
-  }
 
   const downloadFile = (content, filename, type) => {
     const blob = new Blob([content], { type })
     const url = URL.createObjectURL(blob)
-
     const a = document.createElement("a")
     a.href = url
     a.download = filename
     a.click()
-
     URL.revokeObjectURL(url)
     setShowExport(false)
   }
 
+  const exportCSV = () => {
+    const csvContent = "Date,Price\n" + exportData.map(d => `${d.date},${d.price}`).join("\n")
+    downloadFile(csvContent, "price-history.csv", "text/csv")
+  }
+
   return (
-    <div className="bg-white border border-[#e7ebf3] rounded-xl p-4 flex items-center justify-between shadow-sm relative">
-      
+    <div className="bg-white border border-[#e7ebf3] rounded-[1.5rem] p-4 flex items-center justify-between shadow-sm relative">
       {/* Range buttons */}
-      <div className="flex bg-[#eef2f7] rounded-lg p-1">
+      <div className="flex bg-[#f4f7fa] rounded-2xl p-1 gap-1">
         {ranges.map(label => (
           <button
             key={label}
             onClick={() => setActiveRange(label)}
-            className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
+            className={`px-6 py-2 text-[11px] font-black rounded-xl uppercase tracking-wider transition-all duration-300 ${
               activeRange === label
-                ? "bg-white text-primary shadow-sm"
-                : "text-[#4d6599]"
+                ? "bg-white text-blue-600 shadow-md scale-[1.05]"
+                : "text-[#4d6599] hover:bg-white/50"
             }`}
           >
             {label}
@@ -74,38 +52,32 @@ export default function RangeSelector() {
       <div className="relative">
         <button
           onClick={() => setShowExport(!showExport)}
-          className="flex items-center gap-2 bg-[#eef2f7] px-4 py-2 rounded-lg text-sm font-bold text-[#0e121b]"
+          className="flex items-center gap-2 bg-[#f4f7fa] px-5 py-2.5 rounded-2xl text-xs font-black text-[#0e121b] hover:bg-slate-100 transition-colors uppercase tracking-widest"
         >
-          <span className="material-symbols-outlined text-lg">download</span>
+          <span className="material-symbols-outlined text-[18px]">download</span>
           Export
-          <span className="material-symbols-outlined text-lg">expand_more</span>
+          <span className="material-symbols-outlined text-[18px] opacity-40">expand_more</span>
         </button>
 
-        {/* Export dropdown */}
         {showExport && (
-          <div className="absolute right-0 mt-2 bg-white border border-slate-200 rounded-lg shadow-lg w-40 z-50">
+          <div className="absolute right-0 mt-3 bg-white border border-slate-200 rounded-[1.5rem] shadow-2xl w-48 z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
             <button
               onClick={exportCSV}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
+              className="w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-colors flex items-center gap-3"
             >
-              Export CSV
+              <span className="material-symbols-outlined text-lg">csv</span>
+              Download CSV
             </button>
             <button
-              onClick={exportExcel}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
+              onClick={() => setShowExport(false)}
+              className="w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-colors flex items-center gap-3"
             >
-              Export Excel
-            </button>
-            <button
-              onClick={exportPDF}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
-            >
-              Export PDF
+              <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+              Download PDF
             </button>
           </div>
         )}
       </div>
-
     </div>
   )
 }

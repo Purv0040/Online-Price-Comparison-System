@@ -26,7 +26,7 @@ export default function App() {
           {/*<Route path="/search-v2" element={<SearchResultsV2 />} />*/}
 
           <Route path="/product/:id" element={<ProductDetailsV2 />} />
-          <Route path="/price-history" element={<PriceHistory />} />
+          <Route path="/price-history/:id" element={<PriceHistory />} />
           {/* Categories */}
           <Route path="/category" element={<Category />} />
           <Route path="/category/:slug" element={<Category />} />

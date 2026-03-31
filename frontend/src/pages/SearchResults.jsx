@@ -5,6 +5,7 @@ import { useWishlist } from "../context/WishlistContext";
 import { searchProducts } from "../services/api";
 import SearchNavbar from "../components/navbars/SearchNavbar";
 import SearchFooter from "../components/footers/SearchFooter";
+import Breadcrumbs from "../components/product-v2/Breadcrumbs";
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
@@ -339,6 +340,7 @@ export default function SearchResults() {
 
         {/* PRODUCTS */}
         <section className="flex-1 space-y-6">
+          <Breadcrumbs type="search" query={searchQuery} />
           <h2 className="text-xl">
             Showing <b>{filteredProducts.length}</b> results for{" "}
             <span className="text-primary italic">
@@ -435,8 +437,7 @@ export default function SearchResults() {
                   </span>
                 </button>
 
-                {/* IMAGE */}
-                <div className="relative bg-gradient-to-b from-black to-[#1a1a1a] p-6 aspect-square">
+                <div className="relative bg-gradient-to-b from-black to-[#1a1a1a] p-6 aspect-square cursor-pointer" onClick={() => navigate(`/product/${p._id}?from=search&q=${searchQuery}`)}>
                   {/* Badge */}
                   <span className="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
                     {p.badge}
@@ -498,7 +499,7 @@ export default function SearchResults() {
                     </div>
 
                     <button
-                      onClick={() => navigate(`/product/${p._id}`)}
+                      onClick={() => navigate(`/product/${p._id}?from=search&q=${searchQuery}`)}
                       className="w-full mt-[10px] py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm"
                     >
                       Compare Prices

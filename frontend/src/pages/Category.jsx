@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import CategoryNavbar from "../components/navbars/CategoryNavbar";
 import CategoryFooter from "../components/footers/CategoryFooter";
@@ -15,7 +15,7 @@ const categories = [
   { id: 6, slug: "books", title: "Books", description: "Educational, novels and comics.", icon: "📚" },
   { id: 7, slug: "toys", title: "Toys & Baby", description: "Toys, baby care and kids products.", icon: "🧸" },
   { id: 8, slug: "groceries", title: "Grocery", description: "Daily essentials and food items.", icon: "🛒" },
-  { id: 9, slug: "automotive", title: "Automotive", description: "Car accessories and electronics.", icon: "�" },
+  { id: 9, slug: "automotive", title: "Automotive", description: "Car accessories and electronics.", icon: "🚗" },
   { id: 10, slug: "others", title: "Others", description: "Miscellaneous products.", icon: "📦" },
 ];
 
@@ -117,20 +117,49 @@ export default function Category() {
   // Show all categories page
   if (isAll) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-[#fcfdff]">
         <CategoryNavbar />
-        <div className="flex-1 p-6 max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">All Categories</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="flex-1 max-w-7xl mx-auto px-4 py-20">
+          {/* Hero Section */}
+          <div className="text-center mb-20 max-w-3xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-black text-[#0e121b] mb-8 tracking-tighter leading-tight">
+              Explore <span className="text-blue-600">Categories</span>
+            </h1>
+            <p className="text-xl text-slate-500 leading-relaxed font-medium">
+              Discover a meticulously curated selection of top-tier products across every lifestyle segment. Your premium directory for quality comparisons.
+            </p>
+          </div>
+
+          {/* Categories Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
             {categories.map((cat) => (
               <div
                 key={cat.id}
                 onClick={() => navigate(`/category/${cat.slug}`)}
-                className="cursor-pointer bg-white border border-gray-300 rounded-xl p-5 shadow-sm hover:shadow-md transition"
+                className="group cursor-pointer bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col"
               >
-                <div className="text-4xl mb-3">{cat.icon}</div>
-                <h2 className="text-lg font-semibold mb-1">{cat.title}</h2>
-                <p className="text-sm text-gray-600">{cat.description}</p>
+                {/* Icon Container */}
+                <div className="w-20 h-20 rounded-3xl bg-slate-50 flex items-center justify-center text-4xl mb-8 group-hover:bg-blue-600 group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                  <span className="group-hover:filter group-hover:brightness-0 group-hover:invert transition-all duration-500 transform group-hover:scale-110">
+                    {cat.icon}
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-black text-[#0e121b] mb-4 group-hover:text-blue-600 transition-colors">
+                  {cat.title}
+                </h2>
+                
+                <p className="text-slate-500 text-base leading-relaxed mb-10 flex-1 font-medium">
+                  {cat.description}
+                </p>
+
+                {/* Call to Action */}
+                <div className="flex items-center text-blue-600 font-bold text-sm gap-2 mt-auto border-t border-slate-50 pt-6 group-hover:gap-4 transition-all">
+                  View Listings
+                  <span className="material-symbols-outlined text-sm font-bold animate-pulse">
+                    arrow_forward
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -142,46 +171,54 @@ export default function Category() {
 
   // Show specific category page with products
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#fcfdff]">
       <CategoryNavbar />
 
-      <main className="flex-1 max-w-[1440px] mx-auto px-4 lg:px-10 py-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 lg:px-10 py-12">
         {/* Category Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="text-4xl">{currentCategory?.icon}</div>
-            <div>
-              <h1 className="text-3xl font-bold">{currentCategory?.title}</h1>
-              <p className="text-gray-600">{currentCategory?.description}</p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="max-w-3xl">
+            {/* Breadcrumbs */}
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest mb-6">
+              <Link to="/" className="text-slate-400 hover:text-blue-600 transition-colors">Home</Link>
+              <span className="material-symbols-outlined text-[10px] text-slate-300">chevron_right</span>
+              <Link to="/category" className="text-slate-400 hover:text-blue-600 transition-colors">Categories</Link>
+              <span className="material-symbols-outlined text-[10px] text-slate-300">chevron_right</span>
+              <span className="text-blue-600 font-black">{currentCategory?.title}</span>
             </div>
+            <h1 className="text-5xl md:text-6xl font-black text-[#0e121b] mb-4 tracking-tighter capitalize">
+              {currentCategory?.title}
+            </h1>
+            <p className="text-xl text-slate-500 leading-relaxed font-medium">
+              {currentCategory?.description}
+            </p>
           </div>
           
-          {/* Back to categories */}
-          <button
-            onClick={() => navigate("/category")}
-            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-          >
-            ← Back to All Categories
-          </button>
+          <div className="bg-blue-50 px-6 py-4 rounded-3xl border border-blue-100/50 self-start md:self-end">
+            <h2 className="text-blue-700 font-bold text-sm">
+              Showing <span className="text-blue-900">{products.length}</span> products in {currentCategory?.title}
+            </h2>
+          </div>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-20">
+          <div className="text-center py-24">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading products...</p>
+            <p className="mt-4 text-slate-500 font-medium">Finding the best prices...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="text-center py-20">
-            <p className="text-red-600">{error}</p>
+          <div className="text-center py-24 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div className="text-4xl mb-4">⚠️</div>
+            <p className="text-slate-600 font-medium mb-6">{error}</p>
             <button 
               onClick={fetchCategoryProducts}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
             >
-              Try Again
+              Retry Search
             </button>
           </div>
         )}
@@ -189,17 +226,11 @@ export default function Category() {
         {/* Products Grid */}
         {!loading && !error && (
           <>
-            <div className="mb-6">
-              <h2 className="text-xl">
-                Showing <b>{products.length}</b> products in {currentCategory?.title}
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {paginatedProducts.map((p, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-2xl border border-[#e7ebf3] hover:shadow-lg transition overflow-hidden flex flex-col relative"
+                  className="bg-white rounded-[2rem] border border-slate-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 overflow-hidden flex flex-col relative group"
                 >
                   {/* Wishlist */}
                   <button
@@ -209,84 +240,70 @@ export default function Category() {
                       handleWishlistToggle(p);
                     }}
                     disabled={addingProduct === p._id}
-                    className={`absolute top-3 right-3 z-20 p-2 bg-white rounded-full transition shadow-sm cursor-pointer disabled:opacity-50 ${
-                      isInWishlist(p._id) ? "text-red-500" : "text-gray-400 hover:text-red-500"
+                    className={`absolute top-4 right-4 z-20 p-3 bg-white/80 backdrop-blur-md rounded-2xl transition shadow-sm cursor-pointer disabled:opacity-50 ${
+                      isInWishlist(p._id) ? "text-red-500" : "text-slate-400 hover:text-red-500"
                     }`}
                   >
-                    <span className="text-xl">
-                      {isInWishlist(p._id) ? "❤️" : "🤍"}
+                    <span className="material-symbols-outlined text-xl">
+                      {isInWishlist(p._id) ? "favorite" : "favorite"}
                     </span>
                   </button>
 
-                  {/* IMAGE */}
-                  <div className="relative bg-gradient-to-b from-black to-[#1a1a1a] p-6 aspect-square">
-                    {/* Badge */}
-                    <span className="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                      {p.badge}
-                    </span>
-
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      className="h-full mx-auto object-contain"
-                      onError={(e) => {
-                        // Fallback to category-specific image if original fails
-                        const titleLower = p.name.toLowerCase();
-                        if (titleLower.includes('iphone') || titleLower.includes('phone')) {
-                          e.target.src = 'https://picsum.photos/seed/smartphone-mobile-device/400/400';
-                        } else if (titleLower.includes('laptop')) {
-                          e.target.src = 'https://picsum.photos/seed/laptop-computer-notebook/400/400';
-                        } else if (titleLower.includes('headphones')) {
-                          e.target.src = 'https://picsum.photos/seed/headphones-audio-music/400/400';
-                        } else {
-                          e.target.src = 'https://picsum.photos/seed/electronics-gadget-device/400/400';
-                        }
-                      }}
-                    />
-                  </div>
-
-                  {/* CONTENT */}
-                  <div className="p-5 flex flex-col gap-3 flex-1">
-                    <p 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/search?q=${encodeURIComponent(p.brand)}`);
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
-                  >
-                    {p.brand}
-                  </p>
-
-                    <h3 className="font-bold text-blue-600 text-lg leading-snug">
-                      {p.name}
-                    </h3>
-
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <span className="material-symbols-outlined text-green-500 text-base">
-                        storefront
-                      </span>
-                      {p.sites}
-                    </div>
-
-                    <div className="mt-auto">
-                      <p className="text-sm text-gray-500">Starting from</p>
-
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-extrabold text-primary">
-                          {p.price}
+                    <div className="p-6 flex flex-col h-full cursor-pointer" onClick={() => navigate(`/product/${p._id}?from=category`)}>
+                      {/* IMAGE */}
+                      <div className="relative bg-slate-50 rounded-2xl p-6 aspect-square mb-6 overflow-hidden">
+                        {/* Badge */}
+                        <span className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full z-10 shadow-lg shadow-blue-200">
+                          {p.badge}
                         </span>
-                        <span className="line-through text-gray-400 text-sm">
-                          {p.oldPrice}
-                        </span>
+
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => {
+                            e.target.src = 'https://picsum.photos/seed/gadget/400/400';
+                          }}
+                        />
                       </div>
 
-                      <button
-                        onClick={() => navigate(`/product/${p._id}`)}
-                        className="w-full mt-[10px] py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm"
-                      >
-                        Compare Prices
-                      </button>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest leading-none">
+                          {p.category}
+                        </span>
+                        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-full">
+                          <span className="material-symbols-outlined text-yellow-500 text-xs font-filled">star</span>
+                          <span className="text-yellow-700 text-[10px] font-bold">{p.rating}</span>
+                        </div>
+                      </div>
+                      
+                      <h3 className="text-lg font-black text-[#0e121b] mb-4 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
+                        {p.name}
+                      </h3>
+
+                      <div className="flex items-center gap-3 mb-6">
+                        <span className="text-2xl font-black text-[#0e121b]">
+                          {p.price}
+                        </span>
+                        {p.oldPrice && (
+                          <span className="text-slate-400 line-through text-sm font-medium">
+                            {p.oldPrice}
+                          </span>
+                        )}
+                      </div>
                     </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/product/${p._id}?from=category`);
+                      }}
+                      className="w-full py-4 bg-[#0e121b] hover:bg-blue-600 text-white rounded-2xl font-bold text-sm transition-all duration-300 shadow-xl shadow-slate-200 flex items-center justify-center gap-2 group/btn"
+                    >
+                      Compare Prices
+                      <span className="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -294,37 +311,38 @@ export default function Category() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center pt-10 pb-16">
-                <div className="flex items-center gap-1">
-                  {/* Prev */}
+              <div className="flex justify-center pt-20 pb-12">
+                <div className="flex items-center gap-2 p-2 bg-white rounded-2xl border border-slate-100 shadow-sm">
                   <button
-                    className="p-2 rounded-lg hover:bg-gray-200 disabled:opacity-40"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-50 disabled:opacity-30 transition-colors"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   >
-                    <span className="material-symbols-outlined">chevron_left</span>
+                    <span className="material-symbols-outlined text-slate-600">chevron_left</span>
                   </button>
 
-                  {/* Page numbers */}
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      className={`w-10 h-10 rounded-lg hover:bg-gray-200 ${
-                        currentPage === page ? "bg-gray-200 font-bold" : ""
-                      }`}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  <div className="flex gap-1 px-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${
+                          currentPage === page 
+                            ? "bg-blue-600 text-white shadow-lg shadow-blue-200" 
+                            : "text-slate-500 hover:bg-slate-50"
+                        }`}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
 
-                  {/* Next */}
                   <button
-                    className="p-2 rounded-lg hover:bg-gray-200 disabled:opacity-40"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-50 disabled:opacity-30 transition-colors"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   >
-                    <span className="material-symbols-outlined">chevron_right</span>
+                    <span className="material-symbols-outlined text-slate-600">chevron_right</span>
                   </button>
                 </div>
               </div>

@@ -150,7 +150,7 @@ export default function Trending() {
           {products.map((p) => (
             <div
               key={p._id}
-              onClick={() => navigate(`/product/${p._id}`)}
+              onClick={() => navigate(`/product/${p._id}?from=home`)}
               className="group bg-white rounded-2xl border border-[#d0d7e7] overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 relative cursor-pointer"
             >
               {/* Wishlist */}
@@ -223,7 +223,7 @@ export default function Trending() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/product/${p._id}`);
+                        navigate(`/product/${p._id}?from=home`);
                       }}
                       className="px-3 py-1.5 bg-[#f8f9fc] text-[#0e121b] text-xs font-bold rounded-lg border border-[#d0d7e7] hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm"
                     >

@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router-dom"
-export default function PriceHistory({ history = [], stats = {} }) {
+import { useNavigate, useLocation } from "react-router-dom"
+export default function PriceHistory({ productId, history = [], stats = {} }) {
   const navigate = useNavigate()
+  const location = useLocation()
   
   const lowestPrice = stats.lowestPrice || 0
   const highestPrice = stats.highestPrice || 0
@@ -20,7 +21,6 @@ export default function PriceHistory({ history = [], stats = {} }) {
         </span>
       </div>
 
-      {/* Chart Placeholder - In a real app, use a chart library here */}
       <div className="h-24 bg-slate-50 rounded-lg mb-3 relative overflow-hidden border border-slate-100 flex items-end px-2 gap-1">
         {history.length > 0 ? (
           history.slice(0, 15).reverse().map((h, i) => {
@@ -59,7 +59,7 @@ export default function PriceHistory({ history = [], stats = {} }) {
       </div>
       
       <button
-        onClick={() => navigate("/price-history")}
+        onClick={() => navigate(`/price-history/${productId}${location.search}`)}
         className="mt-5 w-full py-2 bg-slate-50 text-blue-600 font-bold text-sm rounded-lg flex items-center justify-center gap-1 hover:bg-blue-50 transition-colors"
       >
         View Full History

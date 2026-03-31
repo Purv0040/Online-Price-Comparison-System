@@ -110,7 +110,7 @@ export default function ProductDetailsV2() {
       <ProductDetailsNavbarV2 />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <Breadcrumbs productTitle={product.title} />
+        <Breadcrumbs product={product} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* LEFT SIDE – Gallery */}
@@ -142,7 +142,7 @@ export default function ProductDetailsV2() {
           </div>
 
           <div className="lg:col-span-3 space-y-6">
-            <PriceHistory history={priceHistory} stats={stats} />
+            <PriceHistory productId={product._id} history={priceHistory} stats={stats} />
           </div>
         </div>
 
