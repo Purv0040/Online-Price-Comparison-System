@@ -35,35 +35,47 @@ async function seed() {
 
     const sellers = await Seller.insertMany([
       { name: "Amazon", platform: "amazon", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg", rating: 4.5, isTrusted: true, baseUrl: "https://amazon.in" },
-      { name: "Flipkart", platform: "flipkart", logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Flipkart_logo.svg", rating: 4.2, isTrusted: true, baseUrl: "https://flipkart.com" }
+      { name: "Flipkart", platform: "flipkart", logo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Flipkart_logo.svg", rating: 4.2, isTrusted: true, baseUrl: "https://flipkart.com" },
+      { name: "Reliance Digital", platform: "other", logo: "https://www.reliancedigital.in/build/client/images/logo.66699B5a.svg", rating: 4.3, isTrusted: true, baseUrl: "https://reliancedigital.in" },
+      { name: "Croma", platform: "other", logo: "https://media.croma.com/image/upload/v1637759004/Croma%20Assets/CMS/Category%20icon/Final%20Icons/Croma_Logo_m069df.png", rating: 4.4, isTrusted: true, baseUrl: "https://croma.com" },
+      { name: "Snapdeal", platform: "snapdeal", logo: "https://upload.wikimedia.org/wikipedia/commons/d/df/Snapdeal_logo.svg", rating: 3.8, isTrusted: false, baseUrl: "https://snapdeal.com" },
+      { name: "ShopClues", platform: "other", logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/ShopClues_logo.svg", rating: 3.5, isTrusted: false, baseUrl: "https://shopclues.com" }
     ]);
 
     for (const d of productsToSeed) {
       const prod = await Product.create({ ...d, description: `Premium ${d.title}` });
-      if (d.isTrending) await TrendingProduct.create({ ...d, name: d.title, stores: "5 Stores Compared" });
+      if (d.isTrending) await TrendingProduct.create({ ...d, name: d.title, stores: `${Math.floor(Math.random() * 5) + 3} Stores Compared` });
       
-      const price1 = d.price;
-      const price2 = d.price + 200;
+      // Select 3 to 5 random sellers for each product
+      const shuffledSellers = [...sellers].sort(() => 0.5 - Math.random());
+      const selectedSellers = shuffledSellers.slice(0, Math.floor(Math.random() * 3) + 3);
 
-      await Price.insertMany([
-        { product: prod._id, seller: sellers[0]._id, price: price1, originalPrice: d.price + 500, discount: 5, url: "#", isInStock: true },
-        { product: prod._id, seller: sellers[1]._id, price: price2, originalPrice: d.price + 700, discount: 8, url: "#", isInStock: true }
-      ]);
+      for (const seller of selectedSellers) {
+        // Randomize price slightly around base price
+        const priceDiff = Math.floor(Math.random() * (d.price * 0.1)) - (d.price * 0.05); // +/- 5% range
+        const finalPrice = Math.round(d.price + priceDiff);
+        const originalPrice = Math.round(finalPrice / (0.8 + Math.random() * 0.15)); // Calculate original based on discount
+        const discount = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
 
-      // Seed history for BOTH sellers to have a realistic graph
-      for (let i = 0; i < 7; i++) {
-        await PriceHistory.create({ 
-          product: prod._id, 
-          seller: sellers[0]._id,
-          price: price1 - (i * 100), 
-          timestamp: new Date(Date.now() - i * 86400000) 
+        await Price.create({
+          product: prod._id,
+          seller: seller._id,
+          price: finalPrice,
+          originalPrice: originalPrice,
+          discount: discount,
+          url: "#",
+          isInStock: Math.random() > 0.1 // 90% in stock
         });
-        await PriceHistory.create({ 
-          product: prod._id, 
-          seller: sellers[1]._id,
-          price: price2 - (i * 100), 
-          timestamp: new Date(Date.now() - i * 86400000) 
-        });
+
+        // Seed history
+        for (let i = 0; i < 7; i++) {
+          await PriceHistory.create({ 
+            product: prod._id, 
+            seller: seller._id,
+            price: finalPrice - (i * Math.floor(Math.random() * 200)), 
+            timestamp: new Date(Date.now() - i * 86400000) 
+          });
+        }
       }
     }
     console.log("Seeding complete. Exit code: 0");
