@@ -101,7 +101,7 @@ export default function ProductDetailsV2() {
   // Map backend seller data to BestPriceBox format
   const bestPriceSeller = selectedSeller ? {
     name: selectedSeller.seller?.name || "Unknown",
-    price: `$${selectedSeller.price.toFixed(2)}`,
+    price: `₹${selectedSeller.price.toLocaleString('en-IN')}`,
     discount: selectedSeller.discount > 0 ? `-${selectedSeller.discount}%` : "0%",
   } : null;
 

@@ -2,7 +2,50 @@ import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { useAuth } from "../../context/AuthContext"
 import { useWishlist } from "../../context/WishlistContext"
-import { searchProducts } from "../../services/api"
+import { getTrendingProducts } from "../../services/api"
+
+const TRENDING_PRODUCTS = [
+  {
+    "_id": "660000000000000000000101",
+    "brand": "Apple",
+    "name": "iPhone 15 Pro, 256GB - Natural Titanium",
+    "price": "₹93,906",
+    "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/z/4/r/-original-imagtc4g22rcatjg.jpeg?q=90",
+    "badge": "HOT DEAL",
+    "badgeColor": "bg-secondary",
+    "stores": "5 Stores Compared"
+  },
+  {
+    "_id": "660000000000000000000102",
+    "brand": "Samsung",
+    "name": "Galaxy S24 Ultra, 512GB - Titanium Gray",
+    "price": "₹122,106",
+    "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/j/m/z/-original-imahgfmxumntk7sy.jpeg?q=90",
+    "badge": "NEW RELEASE",
+    "badgeColor": "bg-blue-600",
+    "stores": "8 Stores Compared"
+  },
+  {
+    "_id": "660000000000000000000103",
+    "brand": "Google",
+    "name": "Pixel 8 Pro, 128GB - Bay Blue",
+    "price": "₹75,106",
+    "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/3/q/3/-original-imahegqhgnafpbzh.jpeg?q=90",
+    "badge": "-15% OFF",
+    "badgeColor": "bg-red-500",
+    "stores": "4 Stores Compared"
+  },
+  {
+    "_id": "660000000000000000000104",
+    "brand": "OnePlus",
+    "name": "OnePlus 12, 256GB - Silky Black",
+    "price": "₹65,706",
+    "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/6/6/p/12-cph2573-oneplus-original-imahhg7buwavsvxp.jpeg?q=90",
+    "badge": "BEST VALUE",
+    "badgeColor": "bg-green-600",
+    "stores": "6 Stores Compared"
+  }
+];
 
 export default function Trending() {
   const navigate = useNavigate()
@@ -17,15 +60,18 @@ export default function Trending() {
     const fetchTrending = async () => {
       try {
         setLoading(true)
-        // Fetch top rated/trending products (just using general search for demo)
-        const response = await searchProducts("", { limit: 4 })
-        if (response.success) {
-          setProducts(response.data.products)
+        const response = await getTrendingProducts()
+        if (response.success && response.data && response.data.length > 0) {
+          setProducts(response.data)
+        } else {
+          // Fallback to static data if DB is empty for UI continuity
+          setProducts(TRENDING_PRODUCTS)
         }
         setLoading(false)
       } catch (err) {
         console.error("Error fetching trending products:", err)
-        setError("Failed to load trending products")
+        // Fallback to static data on error
+        setProducts(TRENDING_PRODUCTS)
         setLoading(false)
       }
     }
@@ -97,7 +143,7 @@ export default function Trending() {
 
       {products.length === 0 ? (
         <div className="p-8 text-center text-slate-500 italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-           No products found. Please seed your database or add products by URL.
+           No products found.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -123,14 +169,14 @@ export default function Trending() {
                 </span>
               </button>
 
-              {/* Badge (Mock dynamic data for UI premium feel) */}
-              {(p.rating > 4.5 || p.price < 50) && (
+              {/* Badge */}
+              {(p.badge || p.rating > 4.5 || p.price < 50) && (
                 <div
                   className={`absolute top-3 left-3 z-10 px-2.5 py-1 text-white text-[10px] font-black rounded uppercase ${
-                    p.rating > 4.5 ? "bg-secondary" : "bg-red-500"
+                    p.badgeColor || (p.rating > 4.5 ? "bg-secondary" : "bg-red-500")
                   }`}
                 >
-                  {p.rating > 4.5 ? "TOP RATED" : "HOT DEAL"}
+                  {p.badge || (p.rating > 4.5 ? "TOP RATED" : "HOT DEAL")}
                 </div>
               )}
 
@@ -138,7 +184,7 @@ export default function Trending() {
               <div className="aspect-square bg-[#f8f9fc] overflow-hidden p-6">
                 <img
                   src={p.image}
-                  alt={p.title}
+                  alt={p.name || p.title}
                   onError={handleImageError}
                   className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-500"
                 />
@@ -157,7 +203,7 @@ export default function Trending() {
                 </p>
 
                 <h3 className="font-bold text-[#0e121b] text-base leading-tight mb-3 line-clamp-2 min-h-[2.5rem]">
-                  {p.title}
+                  {p.name || p.title}
                 </h3>
 
                 <div className="mt-auto flex items-end justify-between">
@@ -166,13 +212,13 @@ export default function Trending() {
                       Best Price
                     </span>
                     <div className="text-xl font-black text-primary">
-                      ${p.lowestPrice?.toFixed(2) || "N/A"}
+                      {p.price || (p.lowestPrice ? `$${p.lowestPrice.toFixed(2)}` : "N/A")}
                     </div>
                   </div>
 
                   <div className="text-right">
                     <span className="text-[10px] text-[#4d6599] block mb-1">
-                      Available on {p.storesCount || "multile"} stores
+                      {p.stores || `Available on ${p.storesCount || "multiple"} stores`}
                     </span>
                     <button
                       onClick={(e) => {

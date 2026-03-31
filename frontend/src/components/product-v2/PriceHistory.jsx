@@ -30,7 +30,7 @@ export default function PriceHistory({ history = [], stats = {} }) {
                 key={i} 
                 className="bg-blue-400/30 w-full rounded-t-sm hover:bg-blue-500/50 transition-colors" 
                 style={{ height: `${Math.max(10, height)}%` }}
-                title={`$${h.price}`}
+                title={`₹${h.price.toLocaleString('en-IN')}`}
               ></div>
             )
           })
@@ -49,12 +49,12 @@ export default function PriceHistory({ history = [], stats = {} }) {
       <div className="border-t border-slate-100 pt-4 space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-slate-500">Highest</span>
-          <span className="font-bold text-slate-900">${highestPrice.toFixed(2)}</span>
+          <span className="font-bold text-slate-900">₹{highestPrice.toLocaleString('en-IN')}</span>
         </div>
 
         <div className="flex justify-between text-sm">
           <span className="text-slate-500">Lowest</span>
-          <span className="font-bold text-emerald-600">${lowestPrice.toFixed(2)}</span>
+          <span className="font-bold text-emerald-600">₹{lowestPrice.toLocaleString('en-IN')}</span>
         </div>
       </div>
       

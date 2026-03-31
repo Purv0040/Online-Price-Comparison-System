@@ -67,7 +67,7 @@ export default function SellerTable({ sellers = [], onSelectSeller, selectedSell
                     {s.seller?.name}
                   </td>
 
-                  <td className="font-bold text-slate-900">${s.price.toFixed(2)}</td>
+                  <td className="font-bold text-slate-900">₹{getPriceNumber(s.price).toLocaleString('en-IN')}</td>
 
                   <td className={s.discount > 0 ? "text-emerald-600 font-medium" : "text-slate-400"}>
                     {s.discount > 0 ? `-${s.discount}%` : "No discount"}

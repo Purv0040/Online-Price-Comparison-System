@@ -67,4 +67,15 @@ export const getProductDetails = async (productId) => {
   }
 };
 
+// Get Trending Products API
+export const getTrendingProducts = async () => {
+  try {
+    const response = await apiClient.get('/trending');
+    return response;
+  } catch (error) {
+    console.error('Trending API error:', error);
+    throw error;
+  }
+};
+
 export default apiClient;

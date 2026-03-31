@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const Price = require('../models/Price');
 const PriceHistory = require('../models/PriceHistory');
 const Seller = require('../models/Seller');
+const TrendingProduct = require('../models/TrendingProduct');
 const { scrapeProduct, getPlatformFromUrl } = require('../utils/scraper');
 const { sendResponse, handleError } = require('../utils/responseHandler');
 const { formatPrice, calculateDiscount } = require('../utils/helpers');
@@ -109,30 +110,76 @@ const getProductDetails = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    const product = await Product.findById(productId);
-    if (!product) {
-      return handleError(res, 404, 'Product not found');
+    // First try finding in regular Product collection
+    let product = await Product.findById(productId);
+    
+    if (product) {
+      const prices = await Price.find({ product: productId })
+        .populate('seller', 'name platform logo rating isTrusted')
+        .sort({ price: 1 });
+
+      const priceHistory = await PriceHistory.find({ product: productId })
+        .sort({ timestamp: -1 })
+        .limit(30);
+
+      return sendResponse(res, 200, true, 'Product details fetched', {
+        product,
+        prices,
+        priceHistory,
+        stats: {
+          lowestPrice: prices[0]?.price || null,
+          highestPrice: prices[prices.length - 1]?.price || null,
+          averagePrice: prices.length > 0 ? Math.round(prices.reduce((sum, p) => sum + p.price, 0) / prices.length) : 0,
+          availableOn: prices.length,
+        },
+      });
     }
 
-    const prices = await Price.find({ product: productId })
-      .populate('seller', 'name platform logo rating isTrusted')
-      .sort({ price: 1 });
+    // If not found, check TrendingProduct collection
+    const trendingProduct = await TrendingProduct.findById(productId);
+    
+    if (trendingProduct) {
+      // Synthesize a response for the UI
+      // Use the 'price' string from database, but parse it if needed for stats
+      const displayPrice = trendingProduct.price || "N/A";
+      const numericPrice = parseFloat(displayPrice.replace(/[^\d.]/g, '')) || 0;
 
-    const priceHistory = await PriceHistory.find({ product: productId })
-      .sort({ timestamp: -1 })
-      .limit(30);
+      // Create a mock seller based on the product info
+      const mockPrices = [{
+        _id: `mock-price-${productId}`,
+        seller: {
+          name: trendingProduct.brand || "Verified Seller",
+          platform: "Direct",
+          isTrusted: true
+        },
+        price: numericPrice,
+        originalPrice: numericPrice,
+        discount: 0,
+        url: "#"
+      }];
 
-    sendResponse(res, 200, true, 'Product details fetched', {
-      product,
-      prices,
-      priceHistory,
-      stats: {
-        lowestPrice: prices[0]?.price || null,
-        highestPrice: prices[prices.length - 1]?.price || null,
-        averagePrice: prices.length > 0 ? Math.round(prices.reduce((sum, p) => sum + p.price, 0) / prices.length) : 0,
-        availableOn: prices.length,
-      },
-    });
+      return sendResponse(res, 200, true, 'Trending product details fetched', {
+        product: {
+          _id: trendingProduct._id,
+          title: trendingProduct.name, // Map name to title
+          brand: trendingProduct.brand,
+          image: trendingProduct.image,
+          category: 'Electronics',
+          description: `This is a trending product: ${trendingProduct.name}`,
+          ...trendingProduct.toObject()
+        },
+        prices: mockPrices,
+        priceHistory: [],
+        stats: {
+          lowestPrice: numericPrice,
+          highestPrice: numericPrice,
+          averagePrice: numericPrice,
+          availableOn: 1,
+        },
+      });
+    }
+
+    return handleError(res, 404, 'Product not found');
   } catch (error) {
     console.error('Get product details error:', error);
     handleError(res, 500, error.message);
@@ -151,7 +198,15 @@ const searchProducts = async (req, res) => {
     // Initial match stage for basic filters (isActive, category, query)
     const matchStage = { isActive: true };
     if (category) {
-      matchStage.category = category;
+      if (category === 'Home & Kitchen') {
+        matchStage.category = { $in: ['Home', 'Home & Kitchen'] };
+      } else if (category === 'Beauty & Personal Care') {
+        matchStage.category = { $in: ['Beauty', 'Beauty & Personal Care'] };
+      } else if (category === 'Sports & Fitness') {
+        matchStage.category = { $in: ['Sports', 'Sports & Fitness'] };
+      } else {
+        matchStage.category = category;
+      }
     }
 
     if (query) {

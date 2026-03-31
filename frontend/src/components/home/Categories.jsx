@@ -7,7 +7,7 @@ export default function Categories() {
     { name: "Electronics", items: "12k+ items", icon: "devices", bg: "bg-blue-50", hoverBg: "group-hover:bg-blue-600", color: "text-blue-600", hoverColor: "group-hover:text-white", slug: "electronics" },
     { name: "Laptops", items: "5k+ items", icon: "laptop_mac", bg: "bg-purple-50", hoverBg: "group-hover:bg-purple-600", color: "text-purple-600", hoverColor: "group-hover:text-white", slug: "electronics" },
     { name: "Fashion", items: "20k+ items", icon: "checkroom", bg: "bg-green-50", hoverBg: "group-hover:bg-green-600", color: "text-green-600", hoverColor: "group-hover:text-white", slug: "fashion" },
-    { name: "Home", items: "15k+ items", icon: "home", bg: "bg-orange-50", hoverBg: "group-hover:bg-orange-600", color: "text-orange-600", hoverColor: "group-hover:text-white", slug: "home" },
+    { name: "Home & Kitchen", items: "15k+ items", icon: "home", bg: "bg-orange-50", hoverBg: "group-hover:bg-orange-600", color: "text-orange-600", hoverColor: "group-hover:text-white", slug: "home" },
     { name: "Beauty", items: "8k+ items", icon: "self_care", bg: "bg-pink-50", hoverBg: "group-hover:bg-pink-600", color: "text-pink-600", hoverColor: "group-hover:text-white", slug: "beauty" },
     { name: "Sports", items: "10k+ items", icon: "sports_basketball", bg: "bg-cyan-50", hoverBg: "group-hover:bg-blue-600", color: "text-blue-600", hoverColor: "group-hover:text-white", slug: "sports" },
   ]

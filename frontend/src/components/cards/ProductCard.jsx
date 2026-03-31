@@ -91,7 +91,7 @@ export default function ProductCard({ product }) {
 
       {/* Info */}
       <div className="p-5 space-y-3">
-        <h3 className="font-bold line-clamp-2">{product.name}</h3>
+        <h3 className="font-bold line-clamp-2">{product.title || product.name}</h3>
         <p className="text-xs text-gray-500">{product.specs || "Product specifications"}</p>
 
         {/* Error Message */}
@@ -102,7 +102,11 @@ export default function ProductCard({ product }) {
         )}
 
         <p className="text-xs text-gray-500">STARTING FROM</p>
-        <p className="text-2xl font-black">{product.price || "$0"}</p>
+        <p className="text-2xl font-black">
+          {typeof product.price === 'number' 
+            ? `₹${product.price.toLocaleString('en-IN')}` 
+            : (product.price?.startsWith('₹') ? product.price : `₹${product.price}`)}
+        </p>
 
         {/* Button */}
         <button

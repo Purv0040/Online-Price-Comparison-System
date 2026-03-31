@@ -12,6 +12,7 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 const priceAlertRoutes = require('./routes/priceAlertRoutes');
 const bulkOrderRoutes = require('./routes/bulkOrderRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const trendingRoutes = require('./routes/trendingRoutes');
 
 // Scheduler
 const { schedulePriceAlerts, schedulePriceUpdates } = require('./utils/scheduler');
@@ -43,6 +44,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/price-alerts', priceAlertRoutes);
 app.use('/api/bulk-orders', bulkOrderRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/trending', trendingRoutes);
 
 // Root route - List all available routes
 app.get('/', (req, res) => {
@@ -63,6 +65,7 @@ app.get('/', (req, res) => {
         'POST /api/products/add-by-url (Protected)',
         'GET /api/products/:productId',
         'GET /api/products/search',
+        'GET /api/trending (Trending products)',
       ],
       wishlist: [
         'GET /api/wishlist (Protected)',
