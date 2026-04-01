@@ -1,7 +1,6 @@
 import DashboardLayout from "../layouts/DashboardLayout"
 import ProfileHeader from "../components/dashboard/ProfileHeader"
 import PriceAlerts from "../components/dashboard/PriceAlerts"
-import WishlistGrid from "../components/dashboard/WishlistGrid"
 import SettingsSidebar from "../components/dashboard/SettingsSidebar"
 import SavingsCard from "../components/dashboard/SavingsCard"
 import RecentlyViewed from "../components/dashboard/RecentlyViewed"
@@ -18,9 +17,6 @@ export default function Dashboard() {
   </div>
 
 
-  <div>
-    <WishlistGrid />
-  </div>
         </div>
 
        {/*  <div className="lg:col-span-4 space-y-6">

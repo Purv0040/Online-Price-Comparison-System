@@ -8,6 +8,7 @@ const TRENDING_PRODUCTS = [
   {
     "_id": "660000000000000000000101",
     "brand": "Apple",
+    "category": "Electronics",
     "name": "iPhone 15 Pro, 256GB - Natural Titanium",
     "price": "₹93,906",
     "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/z/4/r/-original-imagtc4g22rcatjg.jpeg?q=90",
@@ -18,6 +19,7 @@ const TRENDING_PRODUCTS = [
   {
     "_id": "660000000000000000000102",
     "brand": "Samsung",
+    "category": "Electronics",
     "name": "Galaxy S24 Ultra, 512GB - Titanium Gray",
     "price": "₹122,106",
     "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/j/m/z/-original-imahgfmxumntk7sy.jpeg?q=90",
@@ -28,6 +30,7 @@ const TRENDING_PRODUCTS = [
   {
     "_id": "660000000000000000000103",
     "brand": "Google",
+    "category": "Electronics",
     "name": "Pixel 8 Pro, 128GB - Bay Blue",
     "price": "₹75,106",
     "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/3/q/3/-original-imahegqhgnafpbzh.jpeg?q=90",
@@ -38,6 +41,7 @@ const TRENDING_PRODUCTS = [
   {
     "_id": "660000000000000000000104",
     "brand": "OnePlus",
+    "category": "Electronics",
     "name": "OnePlus 12, 256GB - Silky Black",
     "price": "₹65,706",
     "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/6/6/p/12-cph2573-oneplus-original-imahhg7buwavsvxp.jpeg?q=90",
@@ -47,6 +51,13 @@ const TRENDING_PRODUCTS = [
   }
 ];
 
+const getCategoryLabel = (product) => {
+  const raw = product?.category || product?.label || ""
+  const normalized = String(raw).trim().toUpperCase()
+  if (!normalized || normalized === "GENERAL") return ""
+  return normalized
+}
+
 export default function Trending() {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
@@ -55,6 +66,7 @@ export default function Trending() {
   const [loading, setLoading] = useState(true)
   const [addingProduct, setAddingProduct] = useState(null)
   const [error, setError] = useState("")
+  const displayedProducts = products.slice(0, 4)
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -141,13 +153,13 @@ export default function Trending() {
         </div>
       )}
 
-      {products.length === 0 ? (
+      {displayedProducts.length === 0 ? (
         <div className="p-8 text-center text-slate-500 italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
            No products found.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((p) => (
+          {displayedProducts.map((p) => (
             <div
               key={p._id}
               onClick={() => navigate(`/product/${p._id}?from=home`)}
@@ -169,15 +181,11 @@ export default function Trending() {
                 </span>
               </button>
 
-              {/* Badge */}
-              {(p.badge || p.rating > 4.5 || p.price < 50) && (
-                <div
-                  className={`absolute top-3 left-3 z-10 px-2.5 py-1 text-white text-[10px] font-black rounded uppercase ${
-                    p.badgeColor || (p.rating > 4.5 ? "bg-secondary" : "bg-red-500")
-                  }`}
-                >
-                  {p.badge || (p.rating > 4.5 ? "TOP RATED" : "HOT DEAL")}
-                </div>
+              {/* Category Badge */}
+              {getCategoryLabel(p) && (
+                <span className="absolute top-3 left-3 z-10 px-2.5 py-1 text-[#0e121b] text-[10px] font-black rounded uppercase bg-white/95 border border-slate-200 shadow-sm">
+                  {getCategoryLabel(p)}
+                </span>
               )}
 
               {/* Image */}

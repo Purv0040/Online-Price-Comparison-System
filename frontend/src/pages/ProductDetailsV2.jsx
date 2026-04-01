@@ -13,6 +13,11 @@ import PriceHistory from "../components/product-v2/PriceHistory";
 import SimilarProducts from "../components/product-v2/SimilarProducts";
 import ProductDetailsInfo from "../components/product-v2/ProductDetailsInfo";
 
+const normalizeCategoryLabel = (category) => {
+  const value = String(category || "General").trim();
+  return value.toUpperCase();
+};
+
 export default function ProductDetailsV2() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -56,6 +61,32 @@ export default function ProductDetailsV2() {
       fetchData();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (!product?._id) return;
+
+    try {
+      const storageKey = "recentlyViewedProducts";
+      const existing = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      const nextItem = {
+        _id: product._id,
+        name: product.title || product.name || "Product",
+        image: (product.images && product.images[0]) || product.image || "",
+        price: stats?.lowestPrice || stats?.averagePrice || 0,
+        category: product.category || "General",
+        label: normalizeCategoryLabel(product.category),
+        brand: product.brand || "PriceWise",
+        stores: stats?.availableOn ? `${stats.availableOn} Stores Compared` : "Recently Viewed",
+        viewedAt: Date.now(),
+      };
+
+      const deduped = existing.filter((item) => String(item._id) !== String(product._id));
+      const updated = [nextItem, ...deduped].slice(0, 12);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+    } catch (err) {
+      console.error("Failed to store recently viewed product:", err);
+    }
+  }, [product, stats]);
 
   const getStatus = (seller) => {
     if (!seller || !prices.length) return "average";
