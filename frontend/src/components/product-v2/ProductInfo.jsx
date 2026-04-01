@@ -3,6 +3,119 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { useWishlist } from "../../context/WishlistContext"
 
+const getDynamicSpecs = (product) => {
+  const category = String(product?.category || "").toLowerCase()
+  const title = String(product?.title || "").toLowerCase()
+
+  if (category.includes("fashion") || /shoe|sneaker|jeans|shirt|hoodie/.test(title)) {
+    return [
+      "Comfort-focused fit and breathable material",
+      "Durable stitching for daily wear",
+      "Easy-care fabric and color retention",
+      "Designed for regular lifestyle use",
+      "Brand-authentic finish and detailing",
+      "Balanced style and long-term comfort",
+    ]
+  }
+
+  if (category.includes("home") || category.includes("kitchen")) {
+    return [
+      "Built for practical daily household usage",
+      "Reliable performance with easy operation",
+      "Compact and space-efficient design",
+      "Low-maintenance build quality",
+      "Energy-conscious usage profile",
+      "Suitable for modern home routines",
+    ]
+  }
+
+  if (category.includes("beauty")) {
+    return [
+      "Skin and hair friendly formulation",
+      "Easy daily routine compatibility",
+      "Tested quality with consistent results",
+      "Convenient packaging for regular use",
+      "Balanced care for multiple skin/hair types",
+      "Trusted brand-grade product safety",
+    ]
+  }
+
+  if (category.includes("sports")) {
+    return [
+      "Performance-focused build for active use",
+      "Comfortable grip and handling support",
+      "Durable material for routine training",
+      "Lightweight yet stable construction",
+      "Designed for indoor and outdoor sessions",
+      "Reliable everyday fitness usability",
+    ]
+  }
+
+  if (category.includes("automotive") || /car|tyre|battery|helmet|engine oil/.test(title)) {
+    return [
+      "Engineered for dependable road performance",
+      "Built with long-term durability standards",
+      "Vehicle-use compatible practical design",
+      "Consistent reliability in daily driving",
+      "Quality tested for routine automotive needs",
+      "Value-focused maintenance support",
+    ]
+  }
+
+  if (category.includes("grocery") || /atta|salt|oil|coffee|noodles|rice|flour/.test(title)) {
+    return [
+      "Freshness-oriented packaging quality",
+      "Daily kitchen use convenience",
+      "Clear nutrition and quantity labeling",
+      "Easy storage and handling",
+      "Consistent taste and cooking outcome",
+      "Suitable for regular household consumption",
+    ]
+  }
+
+  if (category.includes("book") || /book|novel|author/.test(title)) {
+    return [
+      "Readable print quality and layout",
+      "Strong binding for repeated use",
+      "Engaging content structure",
+      "Portable format for daily reading",
+      "Useful for learning and personal growth",
+      "High shelf-life print durability",
+    ]
+  }
+
+  if (category.includes("toy") || category.includes("baby") || /baby|stroller|walker|feeding bottle|blocks/.test(title)) {
+    return [
+      "Child-friendly and parent-safe design",
+      "Comfort-focused daily usability",
+      "Durable build for repeated handling",
+      "Easy to clean and maintain",
+      "Suitable for early learning and care",
+      "Practical support for baby routines",
+    ]
+  }
+
+  if (category.includes("other")) {
+    return [
+      "Versatile everyday utility product",
+      "Practical and easy-to-use design",
+      "Reliable quality for regular needs",
+      "Balanced performance and value",
+      "Simple maintenance and long usability",
+      "Suitable for home, study, or personal use",
+    ]
+  }
+
+  return [
+    "Dependable performance for regular use",
+    "User-friendly and practical design",
+    "Durable build quality and finish",
+    "Smooth day-to-day usability",
+    "Trusted product reliability",
+    "Balanced value and functionality",
+  ]
+}
+
 export default function ProductInfo({ product }) {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
@@ -135,16 +248,9 @@ export default function ProductInfo({ product }) {
         </h3>
 
         <ul className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12 text-sm text-slate-700">
-          {(product.specifications && Object.keys(product.specifications).length > 0 
+          {(product.specifications && Object.keys(product.specifications).length > 0
             ? Object.entries(product.specifications).map(([key, val]) => `${key}: ${val}`)
-            : [
-              "Industry-leading noise cancellation",
-              "Up to 30-hour battery life",
-              "2x2 Beamforming Microphones",
-              "Speak-to-chat technology",
-              "Multipoint connection",
-              "Quick charging (min for 3h)",
-            ]
+            : getDynamicSpecs(product)
           ).map((item, idx) => (
             <li key={idx} className="flex items-center gap-3">
               <span className="material-symbols-outlined text-blue-600 text-lg">
