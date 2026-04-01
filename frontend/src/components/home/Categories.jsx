@@ -1,15 +1,43 @@
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { searchProducts } from "../../services/api"
 
 export default function Categories() {
   const navigate = useNavigate()
+  const [categoryCounts, setCategoryCounts] = useState({})
 
   const categories = [
-    { name: "Electronics", items: "12k+ items", icon: "devices", bg: "bg-blue-50", hoverBg: "group-hover:bg-blue-600", color: "text-blue-600", hoverColor: "group-hover:text-white", slug: "electronics" },
-    { name: "Fashion", items: "20k+ items", icon: "checkroom", bg: "bg-green-50", hoverBg: "group-hover:bg-green-600", color: "text-green-600", hoverColor: "group-hover:text-white", slug: "fashion" },
-    { name: "Home & Kitchen", items: "15k+ items", icon: "home", bg: "bg-orange-50", hoverBg: "group-hover:bg-orange-600", color: "text-orange-600", hoverColor: "group-hover:text-white", slug: "home" },
-    { name: "Beauty", items: "8k+ items", icon: "self_care", bg: "bg-pink-50", hoverBg: "group-hover:bg-pink-600", color: "text-pink-600", hoverColor: "group-hover:text-white", slug: "beauty" },
-    { name: "Sports", items: "10k+ items", icon: "sports_basketball", bg: "bg-cyan-50", hoverBg: "group-hover:bg-blue-600", color: "text-blue-600", hoverColor: "group-hover:text-white", slug: "sports" },
+    { name: "Electronics", queryCategory: "Electronics", icon: "devices", bg: "bg-blue-50", hoverBg: "group-hover:bg-blue-600", color: "text-blue-600", hoverColor: "group-hover:text-white", slug: "electronics" },
+    { name: "Fashion", queryCategory: "Fashion", icon: "checkroom", bg: "bg-green-50", hoverBg: "group-hover:bg-green-600", color: "text-green-600", hoverColor: "group-hover:text-white", slug: "fashion" },
+    { name: "Home & Kitchen", queryCategory: "Home & Kitchen", icon: "home", bg: "bg-orange-50", hoverBg: "group-hover:bg-orange-600", color: "text-orange-600", hoverColor: "group-hover:text-white", slug: "home" },
+    { name: "Beauty", queryCategory: "Beauty & Personal Care", icon: "self_care", bg: "bg-pink-50", hoverBg: "group-hover:bg-pink-600", color: "text-pink-600", hoverColor: "group-hover:text-white", slug: "beauty" },
+    { name: "Sports", queryCategory: "Sports & Fitness", icon: "sports_basketball", bg: "bg-cyan-50", hoverBg: "group-hover:bg-blue-600", color: "text-blue-600", hoverColor: "group-hover:text-white", slug: "sports" },
   ]
+
+  useEffect(() => {
+    const loadCategoryCounts = async () => {
+      try {
+        const countEntries = await Promise.all(
+          categories.map(async (cat) => {
+            const response = await searchProducts("", {
+              category: cat.queryCategory,
+              page: 1,
+              limit: 1,
+            })
+
+            const total = response?.data?.pagination?.total || 0
+            return [cat.slug, total]
+          })
+        )
+
+        setCategoryCounts(Object.fromEntries(countEntries))
+      } catch (error) {
+        console.error("Failed to load category counts:", error)
+      }
+    }
+
+    loadCategoryCounts()
+  }, [])
 
   return (
     <section className="px-6 py-12">
@@ -48,7 +76,7 @@ export default function Categories() {
             </div>
 
             <h3 className="font-semibold text-[#0e121b]">{cat.name}</h3>
-            <p className="text-sm text-gray-500">{cat.items}</p>
+            <p className="text-sm text-gray-500">{categoryCounts[cat.slug] ?? 0} items</p>
           </div>
         ))}
       </div>

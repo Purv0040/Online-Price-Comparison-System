@@ -204,6 +204,8 @@ const searchProducts = async (req, res) => {
         matchStage.category = { $in: ['Beauty', 'Beauty & Personal Care'] };
       } else if (category === 'Sports & Fitness') {
         matchStage.category = { $in: ['Sports', 'Sports & Fitness'] };
+      } else if (category === 'Books') {
+        matchStage.category = { $in: ['Book', 'Books'] };
       } else {
         matchStage.category = category;
       }
