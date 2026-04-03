@@ -249,19 +249,19 @@ const searchProducts = async (req, res) => {
         apiService.fetchMeeshoProducts(query)
       ]);
 
-      // Merge successful results
-      searchResults.forEach((result, index) => {
-        const platforms = ['Amazon', 'Flipkart', 'Meesho'];
-        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-          console.log(`${platforms[index]} returned ${result.value.length} products`);
-          products = [...products, ...result.value];
-        } else {
-          console.log(`${platforms[index]} search failed or returned nothing.`);
+      // Blend results from all platforms using Round-Robin to keep it diverse but RELEVANT
+      const platformArrays = searchResults
+        .filter(r => r.status === 'fulfilled' && Array.isArray(r.value))
+        .map(r => r.value);
+      
+      products = [];
+      let maxLen = Math.max(...platformArrays.map(a => a.length), 0);
+      
+      for (let i = 0; i < maxLen; i++) {
+        for (let arr of platformArrays) {
+          if (arr[i]) products.push(arr[i]);
         }
-      });
-
-      // Special case: Shuffle results to show diverse platforms at the top
-      products = products.sort(() => Math.random() - 0.5);
+      }
 
     } else if (category) {
       // For categories, try all platforms using category as query
