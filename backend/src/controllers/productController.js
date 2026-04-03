@@ -6,6 +6,7 @@ const TrendingProduct = require('../models/TrendingProduct');
 const { scrapeProduct, getPlatformFromUrl } = require('../utils/scraper');
 const { sendResponse, handleError } = require('../utils/responseHandler');
 const { formatPrice, calculateDiscount } = require('../utils/helpers');
+const apiService = require('../utils/apiService');
 
 // Add product by URL and compare prices
 const addProductByUrl = async (req, res) => {
@@ -110,178 +111,196 @@ const getProductDetails = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    // First try finding in regular Product collection
-    let product = await Product.findById(productId);
-    
-    if (product) {
-      const prices = await Price.find({ product: productId })
-        .populate('seller', 'name platform logo rating isTrusted')
-        .sort({ price: 1 });
+    // Check if it's a standard MongoDB ID
+    const isMongoId = /^[0-9a-fA-F]{24}$/.test(productId);
 
-      const priceHistory = await PriceHistory.find({ product: productId })
-        .sort({ timestamp: -1 })
-        .limit(30);
+    if (isMongoId) {
+      // First try finding in regular Product collection
+      let product = await Product.findById(productId);
+      
+      if (product) {
+        const prices = await Price.find({ product: productId })
+          .populate('seller', 'name platform logo rating isTrusted')
+          .sort({ price: 1 });
 
-      return sendResponse(res, 200, true, 'Product details fetched', {
-        product,
-        prices,
-        priceHistory,
-        stats: {
-          lowestPrice: prices[0]?.price || null,
-          highestPrice: prices[prices.length - 1]?.price || null,
-          averagePrice: prices.length > 0 ? Math.round(prices.reduce((sum, p) => sum + p.price, 0) / prices.length) : 0,
-          availableOn: prices.length,
-        },
-      });
+        const priceHistory = await PriceHistory.find({ product: productId })
+          .sort({ timestamp: -1 })
+          .limit(30);
+
+        return sendResponse(res, 200, true, 'Product details fetched', {
+          product,
+          prices,
+          priceHistory,
+          stats: {
+            lowestPrice: prices[0]?.price || null,
+            highestPrice: prices[prices.length - 1]?.price || null,
+            averagePrice: prices.length > 0 ? Math.round(prices.reduce((sum, p) => sum + p.price, 0) / prices.length) : 0,
+            availableOn: prices.length,
+          },
+        });
+      }
     }
 
-    // If not found, check TrendingProduct collection
-    const trendingProduct = await TrendingProduct.findById(productId);
+    // If not a found Mongo product, treat any other ID as a live API product (e.g. ASINs)
+    let liveProduct = null;
     
-    if (trendingProduct) {
-      // Synthesize a response for the UI
-      // Use the 'price' string from database, but parse it if needed for stats
-      const displayPrice = trendingProduct.price || "N/A";
-      const numericPrice = parseFloat(displayPrice.replace(/[^\d.]/g, '')) || 0;
+    // Attempt to fetch real details from Amazon
+    liveProduct = await apiService.fetchAmazonDetails(productId);
+    
+    if (!liveProduct) {
+      // Fallback placeholder if API fails
+      liveProduct = {
+        _id: productId,
+        title: 'Live Marketplace Product',
+        category: 'Live Data',
+        image: `https://via.placeholder.com/400?text=Live+Product+${productId}`,
+        description: 'Real-time product information fetched from the marketplace.',
+        price: 0,
+        lowestPrice: 0,
+        platform: 'amazon'
+      };
+    }
 
-      // Create a mock seller based on the product info
-      const mockPrices = [{
-        _id: `mock-price-${productId}`,
+    // --- ENHANCED COMPARISON ---
+    // Search for the SAME title to find alternative offers/prices
+    let prices = [];
+    try {
+      const searchTitle = liveProduct.title.split(' ').slice(0, 5).join(' '); // Use first 5 words
+      
+      const [amazonOffers, flipkartOffers] = await Promise.allSettled([
+        apiService.fetchAmazonProducts(searchTitle),
+        apiService.fetchFlipkartProducts(searchTitle)
+      ]);
+      
+      const allOffers = [];
+      if (amazonOffers.status === 'fulfilled') allOffers.push(...(amazonOffers.value || []));
+      if (flipkartOffers.status === 'fulfilled') allOffers.push(...(flipkartOffers.value || []));
+
+      prices = allOffers.map(offer => ({
+        _id: offer.id,
+        price: offer.price,
+        discount: offer.discount || 0,
         seller: {
-          name: trendingProduct.brand || "Verified Seller",
-          platform: "Direct",
-          isTrusted: true
+          name: offer.brand || (offer.platform === 'amazon' ? 'Amazon Seller' : 'Flipkart Seller'),
+          platform: offer.platform,
+          logo: offer.platform === 'amazon' 
+            ? 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' 
+            : 'https://upload.wikimedia.org/wikipedia/commons/1/18/Flipkart_logo.svg',
+          rating: offer.rating || 4.2
         },
-        price: numericPrice,
-        originalPrice: numericPrice,
-        discount: 0,
-        url: "#"
-      }];
+        url: offer.url || liveProduct.url,
+        isTrusted: true
+      }));
 
-      return sendResponse(res, 200, true, 'Trending product details fetched', {
-        product: {
-          _id: trendingProduct._id,
-          title: trendingProduct.name, // Map name to title
-          brand: trendingProduct.brand,
-          image: trendingProduct.image,
-          category: 'Electronics',
-          description: `This is a trending product: ${trendingProduct.name}`,
-          ...trendingProduct.toObject()
-        },
-        prices: mockPrices,
-        priceHistory: [],
-        stats: {
-          lowestPrice: numericPrice,
-          highestPrice: numericPrice,
-          averagePrice: numericPrice,
-          availableOn: 1,
-        },
-      });
+      // Add the main product itself to prices if not already there
+      if (!prices.some(p => p._id === liveProduct._id)) {
+        prices.unshift({
+          _id: liveProduct._id,
+          price: liveProduct.price,
+          discount: 0,
+          seller: {
+            name: liveProduct.brand || 'Main Seller',
+            platform: 'amazon',
+            logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
+            rating: liveProduct.rating
+          },
+          url: liveProduct.url,
+          isTrusted: true
+        });
+      }
+    } catch (e) {
+      console.log('Comparison fetch error:', e.message);
     }
 
-    return handleError(res, 404, 'Product not found');
+    return sendResponse(res, 200, true, 'Live product details fetched with comparisons', {
+       product: liveProduct,
+       prices: prices.sort((a, b) => a.price - b.price),
+       priceHistory: [],
+       stats: { 
+         availableOn: prices.length,
+         lowestPrice: prices[0]?.price || liveProduct.price,
+         highestPrice: prices[prices.length - 1]?.price || liveProduct.price,
+         isLive: true 
+       }
+    });
   } catch (error) {
     console.error('Get product details error:', error);
     handleError(res, 500, error.message);
   }
 };
 
-// Search products
+// Search products using Live APIs
 const searchProducts = async (req, res) => {
   try {
     const startTime = Date.now();
     const { query, category, minPrice, maxPrice, page = 1, limit = 20 } = req.query;
 
-    const skipValue = (parseInt(page) - 1) * parseInt(limit);
-    const limitValue = parseInt(limit);
+    console.log(`Starting Live API search for "${query || 'category:' + category}"...`);
 
-    // Initial match stage for basic filters (isActive, category, query)
-    const matchStage = { isActive: true };
-    if (category) {
-      if (category === 'Home & Kitchen') {
-        matchStage.category = { $in: ['Home', 'Home & Kitchen'] };
-      } else if (category === 'Beauty & Personal Care') {
-        matchStage.category = { $in: ['Beauty', 'Beauty & Personal Care'] };
-      } else if (category === 'Sports & Fitness') {
-        matchStage.category = { $in: ['Sports', 'Sports & Fitness'] };
-      } else if (category === 'Books') {
-        matchStage.category = { $in: ['Book', 'Books'] };
-      } else {
-        matchStage.category = category;
-      }
-    }
+    let products = [];
 
     if (query) {
-      const searchRegex = new RegExp(query, 'i');
-      matchStage.$or = [
-        { title: { $regex: searchRegex } },
-        { brand: { $regex: searchRegex } },
-        { category: { $regex: searchRegex } },
-        { tags: { $in: [searchRegex] } }
-      ];
+      console.log(`Starting multi-platform search for: ${query}`);
+      
+      // Fetch from ALL platforms in parallel
+      const searchResults = await Promise.allSettled([
+        apiService.fetchAmazonProducts(query),
+        apiService.fetchFlipkartProducts(query, page),
+        apiService.fetchMeeshoProducts(query)
+      ]);
+
+      // Merge successful results
+      searchResults.forEach((result, index) => {
+        const platforms = ['Amazon', 'Flipkart', 'Meesho'];
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          console.log(`${platforms[index]} returned ${result.value.length} products`);
+          products = [...products, ...result.value];
+        } else {
+          console.log(`${platforms[index]} search failed or returned nothing.`);
+        }
+      });
+
+      // Special case: Shuffle results to show diverse platforms at the top
+      products = products.sort(() => Math.random() - 0.5);
+
+    } else if (category) {
+      // For categories, try all platforms using category as query
+      const catResults = await Promise.allSettled([
+        apiService.fetchAmazonProducts(category),
+        apiService.fetchFlipkartProducts(category, page),
+        apiService.fetchMeeshoProducts(category)
+      ]);
+      
+      catResults.forEach(res => {
+        if (res.status === 'fulfilled' && Array.isArray(res.value)) {
+          products = [...products, ...res.value];
+        }
+      });
+    } else {
+      // Default trending fallback
+      products = await apiService.fetchAmazonProducts('trending deals electronics');
     }
 
-    console.log(`Starting optimized search for "${query || 'all'}"...`);
-
-    // Aggregation pipeline for performance
-    const pipeline = [
-      { $match: matchStage },
-      // Look up lowest price
-      {
-        $lookup: {
-          from: 'prices',
-          let: { productId: '$_id' },
-          pipeline: [
-            { $match: { $expr: { $eq: ['$product', '$$productId'] } } },
-            { $sort: { price: 1 } },
-            { $limit: 1 },
-            { $project: { price: 1 } }
-          ],
-          as: 'priceInfo'
-        }
-      },
-      {
-        $addFields: {
-          lowestPrice: { $arrayElemAt: ['$priceInfo.price', 0] }
-        }
-      },
-      { $project: { priceInfo: 0 } }
-    ];
-
-    // Price filtering in pipeline
+    // Filter results if prices are provided
     if (minPrice || maxPrice) {
-      const priceFilter = {};
-      if (minPrice) priceFilter.$gte = parseFloat(minPrice);
-      if (maxPrice) priceFilter.$lte = parseFloat(maxPrice);
-      pipeline.push({ $match: { lowestPrice: priceFilter } });
+      products = products.filter(p => {
+        const price = parseFloat(p.price);
+        if (minPrice && price < parseFloat(minPrice)) return false;
+        if (maxPrice && price > parseFloat(maxPrice)) return false;
+        return true;
+      });
     }
-
-    // Sort, skip, limit
-    pipeline.push({ $sort: { rating: -1, createdAt: -1 } });
-    
-    // Fork the pipeline to get both paginated results and total count
-    const [results] = await Product.aggregate([
-      {
-        $facet: {
-          paginatedResults: [...pipeline, { $skip: skipValue }, { $limit: limitValue }],
-          totalCount: [...pipeline, { $count: 'count' }]
-        }
-      }
-    ]);
-
-    const products = results.paginatedResults;
-    const total = results.totalCount[0]?.count || 0;
 
     const duration = Date.now() - startTime;
-    console.log(`✅ Optimized search completed in ${duration}ms. Found ${total} products (showing ${products.length}).`);
+    console.log(`✅ Live search completed in ${duration}ms. Found ${products.length} products.`);
 
-    sendResponse(res, 200, true, 'Products fetched', {
-      products,
+    sendResponse(res, 200, true, 'Live products fetched', {
+      products: products,
       pagination: {
-        total,
+        total: products.length,
         page: parseInt(page),
         limit: parseInt(limit),
-        totalPages: Math.ceil(total / limitValue),
+        totalPages: 1, // API pagination simplified
       },
     });
   } catch (error) {

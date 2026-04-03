@@ -4,53 +4,6 @@ import { useAuth } from "../../context/AuthContext"
 import { useWishlist } from "../../context/WishlistContext"
 import { getTrendingProducts } from "../../services/api"
 
-const TRENDING_PRODUCTS = [
-  {
-    "_id": "660000000000000000000101",
-    "brand": "Apple",
-    "category": "Electronics",
-    "name": "iPhone 15 Pro, 256GB - Natural Titanium",
-    "price": "₹93,906",
-    "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/z/4/r/-original-imagtc4g22rcatjg.jpeg?q=90",
-    "badge": "HOT DEAL",
-    "badgeColor": "bg-secondary",
-    "stores": "5 Stores Compared"
-  },
-  {
-    "_id": "660000000000000000000102",
-    "brand": "Samsung",
-    "category": "Electronics",
-    "name": "Galaxy S24 Ultra, 512GB - Titanium Gray",
-    "price": "₹122,106",
-    "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/j/m/z/-original-imahgfmxumntk7sy.jpeg?q=90",
-    "badge": "NEW RELEASE",
-    "badgeColor": "bg-blue-600",
-    "stores": "8 Stores Compared"
-  },
-  {
-    "_id": "660000000000000000000103",
-    "brand": "Google",
-    "category": "Electronics",
-    "name": "Pixel 8 Pro, 128GB - Bay Blue",
-    "price": "₹75,106",
-    "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/3/q/3/-original-imahegqhgnafpbzh.jpeg?q=90",
-    "badge": "-15% OFF",
-    "badgeColor": "bg-red-500",
-    "stores": "4 Stores Compared"
-  },
-  {
-    "_id": "660000000000000000000104",
-    "brand": "OnePlus",
-    "category": "Electronics",
-    "name": "OnePlus 12, 256GB - Silky Black",
-    "price": "₹65,706",
-    "image": "https://rukminim1.flixcart.com/image/2880/2880/xif0q/mobile/6/6/p/12-cph2573-oneplus-original-imahhg7buwavsvxp.jpeg?q=90",
-    "badge": "BEST VALUE",
-    "badgeColor": "bg-green-600",
-    "stores": "6 Stores Compared"
-  }
-];
-
 const getCategoryLabel = (product) => {
   const raw = product?.category || product?.label || ""
   const normalized = String(raw).trim().toUpperCase()
@@ -76,14 +29,13 @@ export default function Trending() {
         if (response.success && response.data && response.data.length > 0) {
           setProducts(response.data)
         } else {
-          // Fallback to static data if DB is empty for UI continuity
-          setProducts(TRENDING_PRODUCTS)
+          setProducts([])
         }
         setLoading(false)
       } catch (err) {
         console.error("Error fetching trending products:", err)
-        // Fallback to static data on error
-        setProducts(TRENDING_PRODUCTS)
+        setError("Unable to load trending products at this time.")
+        setProducts([])
         setLoading(false)
       }
     }
