@@ -7,6 +7,11 @@ export default function SearchNavbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const [search, setSearch] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const avatarStorageKey = `profileAvatar:${user?.email || "guest"}`;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    user?.name || "User"
+  )}&background=0D8ABC&color=fff&size=128&bold=true`;
+  const avatarUrl = localStorage.getItem(avatarStorageKey) || fallbackAvatar;
 
   const handleWishlistClick = () => {
     if (isAuthenticated) navigate("/wishlist");
@@ -113,8 +118,7 @@ export default function SearchNavbar() {
             onClick={handleProfileClick}
             className="size-10 rounded-full bg-cover bg-center border-2 border-white shadow-sm cursor-pointer"
             style={{
-              backgroundImage:
-                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB_h4JqOPIynNt1bTl2N1VNr2-M66I4wMmQUGMD5I7Tm3EwZN8TxxjwKbyclMaCVGncLEcbqm-DTcfrvVCqqc-5t7yxqK39feV1UxfkKDmBsTnF9oB_ZBYTLfjpoHw-WH0Ka83QQ9x4dz8hCNQMV5ZQa6yFIfQPf9NppAiCAyw2M88A9pC7wF_ulVveVUXcoeUoB1udNQKjl35xuh_TLVLtKqFuI24S7m_NwOaqZL98I7Lq4eNLth61fQ3ALCW7ylF7-B_R34Df37v5')",
+              backgroundImage: `url('${avatarUrl}')`,
             }}
           />
         </div>

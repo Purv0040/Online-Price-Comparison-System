@@ -40,9 +40,9 @@ export default function Categories() {
   }, [])
 
   return (
-    <section className="px-6 py-12">
+    <section className="px-4 sm:px-6 py-12">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-3 sm:gap-0">
         <h2 className="text-2xl font-bold text-[#0e121b]">
           Shop by Category
         </h2>
@@ -67,7 +67,7 @@ export default function Categories() {
             onClick={() =>
               navigate(`/category/${cat.slug}`)
             }
-            className="group bg-white rounded-2xl border border-[#dbe3f0] p-5 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-blue-500 hover:shadow-lg"
+            className="group bg-white rounded-2xl border border-[#dbe3f0] p-4 sm:p-5 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-blue-500 hover:shadow-lg"
           >
             <div className={`w-12 h-12 rounded-xl ${cat.bg} ${cat.hoverBg} flex items-center justify-center mb-4 transition-colors`}>
               <span className={`material-symbols-outlined ${cat.color} ${cat.hoverColor}`}>

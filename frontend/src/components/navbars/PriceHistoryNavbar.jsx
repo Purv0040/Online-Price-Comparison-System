@@ -1,7 +1,14 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function PriceHistoryNavbar() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const avatarStorageKey = `profileAvatar:${user?.email || "guest"}`;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    user?.name || "User"
+  )}&background=0D8ABC&color=fff&size=128&bold=true`;
+  const avatarUrl = localStorage.getItem(avatarStorageKey) || fallbackAvatar;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-[#e7ebf3]">
@@ -57,11 +64,10 @@ export default function PriceHistoryNavbar() {
 
           {/* Profile / Avatar */}
          <div
-              onClick={() => navigate("/profile ")}
+              onClick={() => navigate("/profile")}
               className="size-9 rounded-full bg-cover bg-center cursor-pointer"
               style={{
-                backgroundImage:
-                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBw36RtlQVQcBrZ1A85hP2aQAVkiUhT1mf1tsmWZae2fIDceHWEayzfAVwIvadfBW0knp4yPd0HhCKkJN0ACPnqKS3liUQZnK2t0Cvs1m6HfYFCGg6JKgYbtBLC3fDFt6Jtw-sjlIPSmQcbz_-0r3IDWYTXjoo7h-hUeTQolsdEcJ6xGcVsttHisuDQni7urqDcLRj-fWgmpIka9Iq7wgr35CNm3IquhB6LSjfYbPlyXk3lN5yxTDsNFM2SrDav59UkM0Bb3ig0GD3M')",
+                backgroundImage: `url('${avatarUrl}')`,
               }}
               title="Profile"
             />

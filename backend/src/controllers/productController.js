@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const Price = require('../models/Price');
 const PriceHistory = require('../models/PriceHistory');
@@ -234,8 +235,76 @@ const searchProducts = async (req, res) => {
   try {
     const startTime = Date.now();
     const { query, category, minPrice, maxPrice, page = 1, limit = 20 } = req.query;
+    const parsedPage = parseInt(page, 10) || 1;
+    const parsedLimit = parseInt(limit, 10) || 20;
 
     console.log(`Starting Live API search for "${query || 'category:' + category}"...`);
+
+    // Prefer seeded/database products when MongoDB is connected.
+    if (mongoose.connection.readyState === 1) {
+      const productFilter = { isActive: true };
+
+      if (category) {
+        productFilter.category = category;
+      }
+
+      if (query) {
+        productFilter.$or = [
+          { title: { $regex: query, $options: 'i' } },
+          { brand: { $regex: query, $options: 'i' } },
+          { category: { $regex: query, $options: 'i' } },
+        ];
+      }
+
+      const dbProducts = await Product.find(productFilter)
+        .sort({ createdAt: -1 })
+        .lean();
+
+      if (dbProducts.length > 0) {
+        const productIds = dbProducts.map((product) => product._id);
+
+        const lowestPriceRows = await Price.aggregate([
+          { $match: { product: { $in: productIds } } },
+          { $group: { _id: '$product', lowestPrice: { $min: '$price' } } },
+        ]);
+
+        const lowestPriceMap = new Map(
+          lowestPriceRows.map((row) => [String(row._id), row.lowestPrice])
+        );
+
+        let enrichedProducts = dbProducts.map((product) => ({
+          ...product,
+          lowestPrice: lowestPriceMap.get(String(product._id)) || 0,
+        }));
+
+        if (minPrice || maxPrice) {
+          const parsedMin = minPrice ? parseFloat(minPrice) : null;
+          const parsedMax = maxPrice ? parseFloat(maxPrice) : null;
+
+          enrichedProducts = enrichedProducts.filter((product) => {
+            if (parsedMin !== null && product.lowestPrice < parsedMin) return false;
+            if (parsedMax !== null && product.lowestPrice > parsedMax) return false;
+            return true;
+          });
+        }
+
+        const startIndex = (parsedPage - 1) * parsedLimit;
+        const paginatedProducts = enrichedProducts.slice(startIndex, startIndex + parsedLimit);
+        const duration = Date.now() - startTime;
+
+        console.log(`✅ DB search completed in ${duration}ms. Found ${enrichedProducts.length} products.`);
+
+        return sendResponse(res, 200, true, 'Products fetched from database', {
+          products: paginatedProducts,
+          pagination: {
+            total: enrichedProducts.length,
+            page: parsedPage,
+            limit: parsedLimit,
+            totalPages: Math.ceil(enrichedProducts.length / parsedLimit),
+          },
+        });
+      }
+    }
 
     let products = [];
 
@@ -298,8 +367,8 @@ const searchProducts = async (req, res) => {
       products: products,
       pagination: {
         total: products.length,
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: parsedPage,
+        limit: parsedLimit,
         totalPages: 1, // API pagination simplified
       },
     });

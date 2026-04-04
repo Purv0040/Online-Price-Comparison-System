@@ -1,9 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-export default function ProfileHeader() {
+export default function ProfileHeader({ onSettingsClick }) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const avatarStorageKey = `profileAvatar:${user?.email || "guest"}`;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    user?.name || "User"
+  )}&background=0D8ABC&color=fff&size=128&bold=true`;
+  const avatarUrl = localStorage.getItem(avatarStorageKey) || fallbackAvatar;
 
   // Format date to "Month Year" format
   const formatMemberDate = (dateString) => {
@@ -24,15 +29,10 @@ export default function ProfileHeader() {
           {/* Avatar */}
           <div
             onClick={() => navigate("/profile")}
-            className="size-20 rounded-full cursor-pointer bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-md hover:shadow-lg transition"
+            className="size-20 rounded-full cursor-pointer overflow-hidden border-2 border-blue-100 shadow-md hover:shadow-lg transition"
             title="Click to view full profile"
           >
-            {user?.name
-              ?.split(" ")
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase()
-              .slice(0, 2) || "U"}
+            <img src={avatarUrl} alt={user?.name || "User"} className="w-full h-full object-cover" />
           </div>
 
           {/* Info */}
@@ -74,7 +74,7 @@ export default function ProfileHeader() {
 
           {/* Settings */}
           <button
-            onClick={() => navigate("/settings")}
+            onClick={onSettingsClick}
             className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
             title="Settings"
           >

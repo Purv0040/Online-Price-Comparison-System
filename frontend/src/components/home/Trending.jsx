@@ -19,7 +19,7 @@ export default function Trending() {
   const [loading, setLoading] = useState(true)
   const [addingProduct, setAddingProduct] = useState(null)
   const [error, setError] = useState("")
-  const displayedProducts = products.slice(0, 4)
+  const displayedProducts = products
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -27,7 +27,7 @@ export default function Trending() {
         setLoading(true)
         const response = await getTrendingProducts()
         if (response.success && response.data && response.data.length > 0) {
-          setProducts(response.data)
+          setProducts(response.data.slice(0, 4))
         } else {
           setProducts([])
         }
@@ -74,7 +74,7 @@ export default function Trending() {
 
   if (loading) {
     return (
-      <section className="px-6 py-12">
+      <section className="px-4 sm:px-6 py-12">
         <h2 className="text-2xl font-bold mb-8 text-[#0e121b]">Trending Products</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map(i => (
@@ -86,8 +86,8 @@ export default function Trending() {
   }
 
   return (
-    <section className="px-6 py-12">
-      <div className="flex items-center justify-between mb-8">
+    <section className="px-4 sm:px-6 py-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-3 sm:gap-0">
         <h2 className="text-2xl font-bold text-[#0e121b]">
           Trending Products
         </h2>

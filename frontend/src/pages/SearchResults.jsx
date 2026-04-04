@@ -31,6 +31,7 @@ export default function SearchResults() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 200000]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const itemsPerPage = 6;
 
   // Get search query from URL
@@ -185,9 +186,18 @@ export default function SearchResults() {
     <>
       <SearchNavbar />
 
-      <main className="max-w-[1440px] mx-auto flex gap-8 px-4 lg:px-10 py-8">
+      <main className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 px-3 sm:px-4 lg:px-10 py-6 sm:py-8">
+        <button
+          type="button"
+          onClick={() => setShowMobileFilters((prev) => !prev)}
+          className="lg:hidden inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold text-sm"
+        >
+          <span className="material-symbols-outlined text-base">tune</span>
+          {showMobileFilters ? "Hide Filters" : "Show Filters"}
+        </button>
+
         {/* SIDEBAR */}
-        <aside className="w-64 shrink-0 space-y-8">
+        <aside className={`${showMobileFilters ? "block" : "hidden"} lg:block w-full lg:w-64 shrink-0 space-y-8 bg-white lg:bg-transparent border lg:border-0 border-slate-200 rounded-xl lg:rounded-none p-4 lg:p-0`}>
           {/* CATEGORY */}
           <div>
             <h3 className="text-xs font-bold uppercase text-blue-600 mb-3">
@@ -341,7 +351,7 @@ export default function SearchResults() {
         {/* PRODUCTS */}
         <section className="flex-1 space-y-6">
           <Breadcrumbs type="search" query={searchQuery} />
-          <h2 className="text-xl">
+          <h2 className="text-base sm:text-xl">
             Showing <b>{filteredProducts.length}</b> results for{" "}
             <span className="text-primary italic">
               "{searchQuery}"
@@ -511,8 +521,8 @@ export default function SearchResults() {
           </div>
 
           {/* PAGINATION */}
-          <div className="flex justify-center pt-10 pb-16">
-            <div className="flex items-center gap-1">
+          <div className="flex justify-center pt-8 sm:pt-10 pb-10 sm:pb-16">
+            <div className="flex items-center gap-1 flex-wrap justify-center">
               {/* Prev */}
               <button
                 className="p-2 rounded-lg hover:bg-gray-200 disabled:opacity-40"
@@ -526,7 +536,7 @@ export default function SearchResults() {
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                 <button
                   key={page}
-                  className={`w-10 h-10 rounded-lg hover:bg-gray-200 ${
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg hover:bg-gray-200 ${
                     currentPage === page ? "bg-gray-200 font-bold" : ""
                   }`}
                   onClick={() => setCurrentPage(page)}

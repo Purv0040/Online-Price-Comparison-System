@@ -140,10 +140,10 @@ export default function ProductDetailsV2() {
     <>
       <ProductDetailsNavbarV2 />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <Breadcrumbs product={product} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
           {/* LEFT SIDE – Gallery */}
           <div className="lg:col-span-5">
              <ProductGallery images={galleryImages} />
@@ -162,7 +162,7 @@ export default function ProductDetailsV2() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mt-8 sm:mt-10">
           <div className="lg:col-span-9">
             <SellerTable
               sellers={prices}

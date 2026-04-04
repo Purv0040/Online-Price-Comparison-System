@@ -13,10 +13,10 @@ export default function ProductGallery({ images }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
 
       {/* MAIN IMAGE */}
-      <div className="aspect-square bg-white rounded-xl border border-slate-200 p-8 flex items-center justify-center">
+      <div className="aspect-square bg-white rounded-xl border border-slate-200 p-4 sm:p-8 flex items-center justify-center">
         <img
           src={activeImage}
           alt="Product"
@@ -26,7 +26,7 @@ export default function ProductGallery({ images }) {
       </div>
 
       {/* THUMBNAILS */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-2 sm:gap-4">
         {images.map((img, index) => (
           <button
             key={index}

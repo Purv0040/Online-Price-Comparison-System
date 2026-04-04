@@ -1,8 +1,25 @@
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
+
 export default function PriceAlerts() {
-    const [alerts, setAlerts] = useState([])
+  const [alerts, setAlerts] = useState([])
   const navigate = useNavigate()
+
+  const parsePriceNumber = (value) => {
+    if (typeof value === "number") return value
+    const parsed = Number(String(value || "").replace(/[^\d.]/g, ""))
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+
+  const formatINR = (value) => {
+    const amount = parsePriceNumber(value)
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount)
+  }
 
   useEffect(() => {
     let saved = [];
@@ -14,7 +31,26 @@ export default function PriceAlerts() {
     setAlerts(saved)
   }, [])
 
- 
+  const getAlertKey = (item, index) => item._id || item.id || item.name || index
+
+  const handleAlertToggle = (toggledItem, index) => {
+    const toggledKey = getAlertKey(toggledItem, index)
+
+    const targetItem = alerts.find((item, idx) => getAlertKey(item, idx) === toggledKey)
+    const currentActive = typeof targetItem?.active === "boolean" ? targetItem.active : true
+
+    // OFF behavior: remove alert immediately from dashboard + localStorage.
+    const updatedAlerts = currentActive
+      ? alerts.filter((item, idx) => getAlertKey(item, idx) !== toggledKey)
+      : alerts.map((item, idx) => {
+          const itemKey = getAlertKey(item, idx)
+          if (itemKey !== toggledKey) return item
+          return { ...item, active: true }
+        })
+
+    setAlerts(updatedAlerts)
+    localStorage.setItem("priceAlerts", JSON.stringify(updatedAlerts))
+  }
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
@@ -40,12 +76,12 @@ export default function PriceAlerts() {
               <p className="text-sm text-slate-500 mt-1">
                 Current:{" "}
                 <span className="font-medium text-slate-900">
-                  {item.current}
+                  {formatINR(item.current)}
                 </span>
                 <span className="mx-2 text-slate-300">|</span>
                 Target:{" "}
                 <span className="font-medium text-primary">
-                  {item.target}
+                  {formatINR(item.target)}
                 </span>
               </p>
             </div>
@@ -62,7 +98,8 @@ export default function PriceAlerts() {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                defaultChecked={item.active}
+                checked={typeof item.active === "boolean" ? item.active : true}
+                onChange={() => handleAlertToggle(item, i)}
                 className="sr-only peer"
               />
               <div className="w-12 h-7 bg-slate-200 peer-checked:bg-blue-600 rounded-full relative transition-colors after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:h-5 after:w-5 after:bg-white after:rounded-full after:transition-transform peer-checked:after:translate-x-5" />
@@ -73,7 +110,7 @@ export default function PriceAlerts() {
 
       <div className="p-4 bg-slate-50 text-center">
         <button
-  onClick={() => navigate("/search")}
+  onClick={() => navigate("/category")}
   className="text-sm font-semibold text-primary flex items-center justify-center gap-2 mx-auto"
 >
 

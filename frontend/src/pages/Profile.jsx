@@ -12,15 +12,14 @@ export default function Profile() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formSectionRef = useRef(null);
 
+  const avatarStorageKey = `profileAvatar:${user?.email || "guest"}`;
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     age: "",
     gender: "",
     mobile: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
     address: "",
     state: "",
     district: "",
@@ -47,12 +46,71 @@ export default function Profile() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const savedAvatar = localStorage.getItem(avatarStorageKey);
+    if (savedAvatar) {
+      setAvatar(savedAvatar);
+    }
+
+  }, [user, avatarStorageKey]);
+
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setAvatar(previewUrl);
+      if (!file.type.startsWith("image/")) {
+        setSubmitError("Please select an image file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const source = reader.result;
+        const image = new Image();
+
+        image.onload = () => {
+          try {
+            const maxDimension = 1024;
+            const ratio = Math.min(maxDimension / image.width, maxDimension / image.height, 1);
+            const width = Math.round(image.width * ratio);
+            const height = Math.round(image.height * ratio);
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+
+            if (!ctx) {
+              throw new Error("Canvas context unavailable");
+            }
+
+            ctx.drawImage(image, 0, 0, width, height);
+
+            // Compress to jpeg to avoid localStorage quota issues with very large files.
+            const previewUrl = canvas.toDataURL("image/jpeg", 0.82);
+            setAvatar(previewUrl);
+            localStorage.setItem(avatarStorageKey, previewUrl);
+            setSubmitSuccess("Profile picture updated ✅");
+            setSubmitError("");
+          } catch {
+            setSubmitError("Failed to process image. Please try another photo.");
+          }
+        };
+
+        image.onerror = () => setSubmitError("Failed to read image file.");
+        image.src = source;
+      };
+      reader.onerror = () => setSubmitError("Failed to read image file.");
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleAvatarRemove = () => {
+    setAvatar(null);
+    localStorage.removeItem(avatarStorageKey);
+    setSubmitSuccess("Profile picture removed");
+    setSubmitError("");
   };
 
   const handleEditClick = () => {
@@ -60,10 +118,6 @@ export default function Profile() {
     setTimeout(() => {
       formSectionRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 0);
-  };
-
-  const handleSettingsClick = () => {
-    alert("Settings coming soon!");
   };
 
   const inputClass =
@@ -91,19 +145,6 @@ export default function Profile() {
     // Mobile rule: must be exactly 10 digits (only if user entered something)
     if (form.mobile && !/^\d{10}$/.test(form.mobile)) {
       newErrors.mobile = "Mobile number must be 10 digits";
-    }
-
-    // Password rules (only if user tries to change password)
-    if (form.currentPassword || form.newPassword || form.confirmPassword) {
-      if (!form.currentPassword) {
-        newErrors.currentPassword = "Enter current password";
-      }
-      if (!form.newPassword) {
-        newErrors.newPassword = "Enter new password";
-      }
-      if (form.newPassword !== form.confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match";
-      }
     }
 
     setErrors(newErrors);
@@ -134,21 +175,8 @@ export default function Profile() {
         pincode: form.pincode,
       };
 
-      // Add password change if provided
-      if (form.newPassword) {
-        updateData.currentPassword = form.currentPassword;
-        updateData.newPassword = form.newPassword;
-      }
-
       await updateProfile(updateData);
       setSubmitSuccess("Profile updated successfully ✅");
-      // Clear password fields after successful submit
-      setForm((prev) => ({
-        ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      }));
     } catch (err) {
       setSubmitError(err.message || "Failed to update profile. Please try again.");
       console.error("Profile update error:", err);
@@ -161,7 +189,7 @@ export default function Profile() {
     <div>
       <ProfileNavbar />
 
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="p-3 sm:p-6 max-w-5xl mx-auto">
         {/* Loading State */}
         {loading ? (
           <div className="text-center py-16">
@@ -176,14 +204,16 @@ export default function Profile() {
             {user && (
               <ProfileCard
                 user={user}
+                avatar={avatar}
+                onAvatarChange={handleAvatarChange}
+                onRemoveAvatar={handleAvatarRemove}
                 onEditClick={handleEditClick}
-                onSettingsClick={handleSettingsClick}
               />
             )}
 
             {/* Edit Form Section */}
-            <div ref={formSectionRef} className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">Edit Profile Information</h2>
+            <div ref={formSectionRef} className="bg-white rounded-2xl shadow-lg p-4 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-900">Edit Profile Information</h2>
 
               {/* Error Message */}
               {submitError && (
@@ -280,71 +310,6 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* Change Password Section */}
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-900">Change Password</h3>
-                  <p className="text-sm text-gray-600 mb-4">Leave blank if you don't want to change your password</p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Current Password
-                      </label>
-                      <input
-                        name="currentPassword"
-                        type="password"
-                        placeholder="Enter current password"
-                        className={inputClass}
-                        value={form.currentPassword}
-                        onChange={handleChange}
-                      />
-                      {errors.currentPassword && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.currentPassword}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        New Password
-                      </label>
-                      <input
-                        name="newPassword"
-                        type="password"
-                        placeholder="Enter new password"
-                        className={inputClass}
-                        value={form.newPassword}
-                        onChange={handleChange}
-                      />
-                      {errors.newPassword && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.newPassword}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Confirm Password
-                      </label>
-                      <input
-                        name="confirmPassword"
-                        type="password"
-                        placeholder="Re-enter new password"
-                        className={inputClass}
-                        value={form.confirmPassword}
-                        onChange={handleChange}
-                      />
-                      {errors.confirmPassword && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.confirmPassword}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
                 {/* Address */}
                 <div className="mt-8">
                   <h3 className="text-lg font-semibold mb-4 text-gray-900">Address Information</h3>
@@ -398,18 +363,18 @@ export default function Profile() {
                 </div>
 
                 {/* Save */}
-                <div className="mt-8 flex gap-3 justify-center">
+                <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium w-full sm:w-auto"
                   >
                     {isSubmitting ? "Saving..." : "Save Changes"}
                   </button>
                   <button
                     type="button"
                     onClick={() => window.history.back()}
-                    className="px-8 py-3 border-2 border-gray-300 text-gray-600 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition font-medium"
+                    className="px-8 py-3 border-2 border-gray-300 text-gray-600 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition font-medium w-full sm:w-auto"
                   >
                     Cancel
                   </button>
@@ -418,6 +383,7 @@ export default function Profile() {
             </div>
           </>
         )}
+
       </div>
 
       <ProfileFooter />

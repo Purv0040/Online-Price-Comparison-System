@@ -26,7 +26,7 @@ export default function WishlistCard({ item, onDelete }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#d0d7e7] hover:shadow-md transition">
+    <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-[#d0d7e7] hover:shadow-md transition">
       {/* Image section */}
       <div className="relative bg-[#f8f9fc] rounded-xl p-4 overflow-hidden group">
         {/* Delete icon */}
@@ -46,7 +46,7 @@ export default function WishlistCard({ item, onDelete }) {
         <img
           src={productImage}
           alt={productName}
-          className="w-full h-48 object-contain transition-transform duration-300 group-hover:scale-110"
+          className="w-full h-40 sm:h-48 object-contain transition-transform duration-300 group-hover:scale-110"
           onError={(e) => {
             e.target.src = "https://via.placeholder.com/200?text=No+Image"
           }}
@@ -59,12 +59,12 @@ export default function WishlistCard({ item, onDelete }) {
           {productCategory}
         </p>
 
-        <h3 className="font-semibold text-[#0e121b] leading-tight line-clamp-2">
+        <h3 className="font-semibold text-[#0e121b] leading-tight line-clamp-2 text-sm sm:text-base">
           {productName}
         </h3>
 
         <div className="flex items-center gap-2">
-          <span className="text-primary font-black text-lg">
+          <span className="text-primary font-black text-base sm:text-lg">
             {productPrice}
           </span>
         </div>
@@ -75,12 +75,12 @@ export default function WishlistCard({ item, onDelete }) {
         {/* Compare → Product Details */}
         <button
           onClick={() => navigate(`/product/${productId}`)}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition text-sm sm:text-base"
         >
           Compare Prices
         </button>
 
-        <div className="flex gap-3 mt-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3">
           {/* History → Price History page */}
           <button
             onClick={() => navigate(`/price-history`)}
