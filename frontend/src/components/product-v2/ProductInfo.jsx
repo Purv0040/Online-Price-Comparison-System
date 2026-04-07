@@ -2,6 +2,37 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { useWishlist } from "../../context/WishlistContext"
+import { priceAlertAPI } from "../../services"
+
+const ALERTS_STORAGE_KEY = "priceAlerts"
+
+const parsePriceNumber = (value) => {
+  if (typeof value === "number") return value
+  const parsed = Number(String(value || "").replace(/[^\d.]/g, ""))
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const formatINR = (value) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value || 0)
+
+const isMongoObjectId = (value) => /^[0-9a-fA-F]{24}$/.test(String(value || ""))
+
+const getStoredAlerts = () => {
+  try {
+    return JSON.parse(localStorage.getItem(ALERTS_STORAGE_KEY)) || []
+  } catch {
+    return []
+  }
+}
+
+const saveStoredAlerts = (alerts) => {
+  localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(alerts))
+}
 
 const getDynamicSpecs = (product) => {
   const category = String(product?.category || "").toLowerCase()
@@ -121,70 +152,117 @@ export default function ProductInfo({ product }) {
   const { isAuthenticated } = useAuth()
   const { addToWishlist, isInWishlist } = useWishlist()
 
-  if (!product) return null
-
   const [alertOn, setAlertOn] = useState(false)
   const [showTargetModal, setShowTargetModal] = useState(false)
   const [targetPriceInput, setTargetPriceInput] = useState("")
   const [targetPriceError, setTargetPriceError] = useState("")
   const [pendingCurrentPrice, setPendingCurrentPrice] = useState(0)
+  const [currentAlertId, setCurrentAlertId] = useState(null)
 
-  const parsePriceNumber = (value) => {
-    if (typeof value === "number") return value
-    const parsed = Number(String(value || "").replace(/[^\d.]/g, ""))
-    return Number.isFinite(parsed) ? parsed : 0
-  }
+  if (!product) return null
 
-  const formatINR = (value) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value || 0)
-
-  // 🔹 On load: check if this product already has a price alert
   useEffect(() => {
-    let existing = []
-    try {
-      existing = JSON.parse(localStorage.getItem("priceAlerts")) || []
-    } catch (e) {
-      existing = []
-    }
-    const already = existing.find((p) => p.name === product.title)
-    if (already && already.active !== false) {
-      setAlertOn(true)
-    }
-  }, [product.title])
+    let mounted = true
 
-  // 🔹 Toggle price alert
-  const handleToggle = () => {
-    const newValue = !alertOn
+    const syncAlertState = async () => {
+      if (!product?._id) return
 
-    if (newValue) {
-      const currentPrice = parsePriceNumber(product.lowestPrice || product.price)
-      const suggestedTarget = currentPrice > 0 ? Math.max(1, Math.round(currentPrice * 0.95)) : ""
-      setPendingCurrentPrice(currentPrice)
-      setTargetPriceInput(String(suggestedTarget))
-      setTargetPriceError("")
-      setShowTargetModal(true)
-      setAlertOn(false)
-    } else {
-      let existing = []
-      try {
-        existing = JSON.parse(localStorage.getItem("priceAlerts")) || []
-      } catch (e) {
-        existing = []
+      if (isAuthenticated) {
+        try {
+          const response = await priceAlertAPI.getAll()
+          const alerts = response?.data?.alerts || []
+          const already = alerts.find((alert) => {
+            const alertProductId = alert?.product?._id || alert?.product
+            return String(alertProductId) === String(product._id) && alert?.isActive !== false
+          })
+
+          if (!mounted) return
+          setAlertOn(Boolean(already))
+          setCurrentAlertId(already?._id || null)
+          return
+        } catch (error) {
+          console.error("Price alert fetch error:", error)
+        }
       }
 
-      // turn OFF → remove from alerts
-      const updated = existing.filter((p) => p.name !== product.title)
-      localStorage.setItem("priceAlerts", JSON.stringify(updated))
-      setAlertOn(false)
+      const existing = getStoredAlerts()
+      const already = existing.find((p) => p.name === product.title)
+      if (!mounted) return
+      setAlertOn(Boolean(already && already.active !== false))
+      setCurrentAlertId(null)
     }
+
+    syncAlertState()
+
+    return () => {
+      mounted = false
+    }
+  }, [product._id, product.title, isAuthenticated])
+
+  const openTargetModal = () => {
+    const currentPrice = parsePriceNumber(product.lowestPrice || product.price)
+    const suggestedTarget = currentPrice > 0 ? Math.max(1, Math.round(currentPrice * 0.95)) : ""
+
+    setPendingCurrentPrice(currentPrice)
+    setTargetPriceInput(String(suggestedTarget))
+    setTargetPriceError("")
+    setShowTargetModal(true)
   }
 
-  const handleTargetPriceSubmit = (e) => {
+  const disableLocalAlert = () => {
+    const existing = getStoredAlerts()
+    const updated = existing.filter((p) => p.name !== product.title)
+    saveStoredAlerts(updated)
+    setAlertOn(false)
+  }
+
+  const disableRemoteAlert = async () => {
+    let alertIdToDelete = currentAlertId
+
+    if (!alertIdToDelete) {
+      const response = await priceAlertAPI.getAll()
+      const alerts = response?.data?.alerts || []
+      const match = alerts.find((alert) => {
+        const alertProductId = alert?.product?._id || alert?.product
+        return String(alertProductId) === String(product._id) && alert?.isActive !== false
+      })
+      alertIdToDelete = match?._id || null
+    }
+
+    if (alertIdToDelete) {
+      await priceAlertAPI.delete(alertIdToDelete)
+    }
+
+    setAlertOn(false)
+    setCurrentAlertId(null)
+  }
+
+  const handleToggle = async () => {
+    if (!alertOn) {
+      if (!isAuthenticated) {
+        navigate("/login")
+        return
+      }
+
+      openTargetModal()
+      return
+    }
+
+    if (isAuthenticated) {
+      try {
+        await disableRemoteAlert()
+      } catch (error) {
+        console.error("Price alert delete error:", error)
+        setTargetPriceError(error?.response?.data?.message || "Failed to disable price alert")
+        setShowTargetModal(true)
+      }
+      return
+    }
+
+    disableLocalAlert()
+  }
+
+  const handleTargetPriceSubmit = async (e) => {
     e.preventDefault()
 
     const targetPrice = parsePriceNumber(targetPriceInput)
@@ -193,13 +271,26 @@ export default function ProductInfo({ product }) {
       return
     }
 
-    let existing = []
-    try {
-      existing = JSON.parse(localStorage.getItem("priceAlerts")) || []
-    } catch (err) {
-      existing = []
+    if (isAuthenticated) {
+      if (!isMongoObjectId(product._id)) {
+        setTargetPriceError("Price alerts are available only for products saved in database")
+        return
+      }
+
+      try {
+        const response = await priceAlertAPI.create({ productId: product._id, targetPrice })
+        setCurrentAlertId(response?.data?.alert?._id || null)
+        setAlertOn(true)
+        setShowTargetModal(false)
+        setTargetPriceError("")
+      } catch (error) {
+        console.error("Price alert create error:", error)
+        setTargetPriceError(error?.response?.data?.message || "Failed to create alert")
+      }
+      return
     }
 
+    const existing = getStoredAlerts()
     const already = existing.find((p) => p.name === product.title)
     const nextAlert = {
       ...product,
@@ -213,7 +304,7 @@ export default function ProductInfo({ product }) {
       ? existing.map((p) => (p.name === product.title ? { ...p, ...nextAlert } : p))
       : [...existing, nextAlert]
 
-    localStorage.setItem("priceAlerts", JSON.stringify(updated))
+    saveStoredAlerts(updated)
     setAlertOn(true)
     setShowTargetModal(false)
     setTargetPriceError("")
@@ -225,7 +316,6 @@ export default function ProductInfo({ product }) {
     setAlertOn(false)
   }
 
-  // 🔹 Wishlist heart click
   const handleWishlist = async () => {
     if (!isAuthenticated) {
       navigate("/login")
@@ -245,9 +335,7 @@ export default function ProductInfo({ product }) {
   return (
     <>
       <div className="space-y-6 sm:space-y-8">
-      {/* TOP ROW */}
       <div className="flex flex-col lg:flex-row justify-between lg:items-start gap-4">
-        {/* LEFT */}
         <div>
           <span className="inline-block bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">
             Top Rated 2024
@@ -271,7 +359,6 @@ export default function ProductInfo({ product }) {
           </div>
         </div>
 
-        {/* RIGHT – PRICE ALERT + WISHLIST */}
         <div className="w-full lg:w-auto flex items-center justify-between lg:justify-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm">
           <span className="text-sm font-medium text-slate-900">
             Price Alert
@@ -293,16 +380,14 @@ export default function ProductInfo({ product }) {
             ></div>
           </label>
 
-          {/* ❤️ Wishlist */}
           <button onClick={handleWishlist} title="Add to Wishlist">
-            <span className="text-red-500 text-xl leading-none">
-              {isInWishlist(product._id) ? "❤️" : "🤍"}
+            <span className="material-symbols-outlined text-red-500 text-xl leading-none">
+              {isInWishlist(product._id) ? "favorite" : "favorite_border"}
             </span>
           </button>
         </div>
       </div>
 
-      {/* KEY SPECS */}
       <div>
         <h3 className="text-base sm:text-lg font-bold text-slate-900">
           Key Specifications
@@ -337,7 +422,7 @@ export default function ProductInfo({ product }) {
             <form onSubmit={handleTargetPriceSubmit} className="px-4 sm:px-6 py-4 sm:py-5">
               <label className="block text-sm font-medium text-slate-700 mb-2">Target price (INR)</label>
               <div className="flex items-center rounded-xl border border-slate-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100 transition-all">
-                <span className="pl-4 pr-2 text-slate-500 font-semibold">₹</span>
+                <span className="pl-4 pr-2 text-slate-500 font-semibold">INR</span>
                 <input
                   type="number"
                   min="1"

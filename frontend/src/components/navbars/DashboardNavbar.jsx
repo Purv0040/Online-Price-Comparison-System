@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom"
 import { useEffect, useRef, useState } from "react"
 import { useAuth } from "../../context/AuthContext"
+import { priceAlertAPI } from "../../services"
 
 export default function DashboardNavbar() {
   const navigate = useNavigate()
@@ -8,7 +9,7 @@ export default function DashboardNavbar() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications, setNotifications] = useState([])
   const notificationsRef = useRef(null)
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const avatarStorageKey = `profileAvatar:${user?.email || "guest"}`
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     user?.name || "User"
@@ -21,7 +22,35 @@ export default function DashboardNavbar() {
     navigate(`/search?q=${encodeURIComponent(query)}`)
   }
 
-  const loadNotifications = () => {
+  const formatINR = (value) => {
+    const amount = Number(value || 0)
+    if (!Number.isFinite(amount) || amount <= 0) return "Not set"
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount)
+  }
+
+  const loadNotifications = async () => {
+    if (isAuthenticated) {
+      try {
+        const response = await priceAlertAPI.getAll()
+        const apiAlerts = response?.data?.alerts || []
+        const mapped = apiAlerts.map((alert) => ({
+          _id: alert?._id,
+          productId: alert?.product?._id || alert?.product,
+          name: alert?.product?.title || "Price Alert",
+          target: alert?.targetPrice,
+        }))
+        setNotifications(mapped)
+        return
+      } catch (error) {
+        console.error("Notification alert fetch error:", error)
+      }
+    }
+
     try {
       const alerts = JSON.parse(localStorage.getItem("priceAlerts")) || []
       setNotifications(alerts)
@@ -32,7 +61,7 @@ export default function DashboardNavbar() {
 
   useEffect(() => {
     loadNotifications()
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -54,7 +83,11 @@ export default function DashboardNavbar() {
 
   const handleNotificationClick = (item) => {
     setShowNotifications(false)
-    if (item?._id) {
+    if (item?.productId) {
+      navigate(`/product/${item.productId}?from=dashboard`)
+      return
+    }
+    if (item?._id && String(item._id).length === 24) {
       navigate(`/product/${item._id}?from=dashboard`)
       return
     }
@@ -146,7 +179,7 @@ export default function DashboardNavbar() {
                             {item?.name || "Price Alert"}
                           </p>
                           <p className="text-xs text-slate-500 mt-1">
-                            Target: {item?.target || "Not set"}
+                            Target: {typeof item?.target === "number" ? formatINR(item.target) : (item?.target || "Not set")}
                           </p>
                         </button>
                       ))}

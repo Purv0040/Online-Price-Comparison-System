@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
+import { useAuth } from "../../context/AuthContext"
+import { priceAlertAPI } from "../../services"
 
 export default function PriceAlerts() {
   const [alerts, setAlerts] = useState([])
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
 
   const parsePriceNumber = (value) => {
     if (typeof value === "number") return value
@@ -21,23 +24,74 @@ export default function PriceAlerts() {
     }).format(amount)
   }
 
-  useEffect(() => {
-    let saved = [];
-    try {
-      saved = JSON.parse(localStorage.getItem("priceAlerts")) || []
-    } catch (e) {
-      saved = []
+  const mapApiAlertToUi = (alert) => {
+    const product = alert?.product || {}
+    return {
+      _id: alert?._id,
+      productId: product?._id || alert?.product,
+      name: product?.title || "Price Alert",
+      image: product?.image || "",
+      current: Number(alert?.currentPrice || 0),
+      target: Number(alert?.targetPrice || 0),
+      active: alert?.isActive !== false,
+      dropping: false,
     }
-    setAlerts(saved)
-  }, [])
+  }
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadAlerts = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await priceAlertAPI.getAll()
+          const apiAlerts = response?.data?.alerts || []
+          if (!mounted) return
+          setAlerts(apiAlerts.map(mapApiAlertToUi))
+          return
+        } catch (error) {
+          console.error("Price alerts fetch error:", error)
+        }
+      }
+
+      let saved = []
+      try {
+        saved = JSON.parse(localStorage.getItem("priceAlerts")) || []
+      } catch (e) {
+        saved = []
+      }
+      if (!mounted) return
+      setAlerts(saved)
+    }
+
+    loadAlerts()
+
+    return () => {
+      mounted = false
+    }
+  }, [isAuthenticated])
 
   const getAlertKey = (item, index) => item._id || item.id || item.name || index
 
-  const handleAlertToggle = (toggledItem, index) => {
+  const handleAlertToggle = async (toggledItem, index) => {
     const toggledKey = getAlertKey(toggledItem, index)
 
     const targetItem = alerts.find((item, idx) => getAlertKey(item, idx) === toggledKey)
     const currentActive = typeof targetItem?.active === "boolean" ? targetItem.active : true
+
+    if (isAuthenticated && currentActive) {
+      try {
+        if (targetItem?._id) {
+          await priceAlertAPI.delete(targetItem._id)
+        }
+        const updatedAlerts = alerts.filter((item, idx) => getAlertKey(item, idx) !== toggledKey)
+        setAlerts(updatedAlerts)
+        return
+      } catch (error) {
+        console.error("Price alert delete error:", error)
+        return
+      }
+    }
 
     // OFF behavior: remove alert immediately from dashboard + localStorage.
     const updatedAlerts = currentActive
@@ -49,7 +103,9 @@ export default function PriceAlerts() {
         })
 
     setAlerts(updatedAlerts)
-    localStorage.setItem("priceAlerts", JSON.stringify(updatedAlerts))
+    if (!isAuthenticated) {
+      localStorage.setItem("priceAlerts", JSON.stringify(updatedAlerts))
+    }
   }
 
   return (
@@ -76,12 +132,12 @@ export default function PriceAlerts() {
               <p className="text-sm text-slate-500 mt-1">
                 Current:{" "}
                 <span className="font-medium text-slate-900">
-                  {formatINR(item.current)}
+                  {parsePriceNumber(item.current) > 0 ? formatINR(item.current) : "N/A"}
                 </span>
                 <span className="mx-2 text-slate-300">|</span>
                 Target:{" "}
                 <span className="font-medium text-primary">
-                  {formatINR(item.target)}
+                  {parsePriceNumber(item.target) > 0 ? formatINR(item.target) : "N/A"}
                 </span>
               </p>
             </div>
