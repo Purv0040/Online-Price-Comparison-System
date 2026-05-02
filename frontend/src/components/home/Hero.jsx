@@ -7,7 +7,7 @@ export default function Hero() {
 
   const handleSearch = () => {
     if (!query.trim()) return
-    navigate(`/search?q=${encodeURIComponent(query)}`)
+    window.open(`http://localhost:8501/?q=${encodeURIComponent(query)}`, "_blank")
   }
 
   const handleKeyDown = (e) => {

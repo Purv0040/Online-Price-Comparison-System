@@ -1,0 +1,133 @@
+PRICEHUNT PROJECT GUIDE
+=======================
+
+1) What this project does
+-------------------------
+PriceHunt is a Streamlit web app that compares product prices across:
+- Amazon India
+- Flipkart
+- Myntra
+- Meesho
+
+You can enter:
+- A product name (example: iPhone 15, Nike Air Max)
+- A product URL from one platform
+
+The app then finds prices on multiple platforms and shows:
+- Best deal
+- Potential savings
+- Price chart
+- Detailed comparison table
+
+
+2) Technology used (proper stack)
+---------------------------------
+Frontend/UI:
+- Streamlit (Python web UI framework)
+- Custom HTML/CSS inside Streamlit for styling
+
+Backend/Logic:
+- Python 3.10+ (recommended)
+- requests (HTTP calls)
+- BeautifulSoup4 + lxml (Amazon scraping/parsing)
+- concurrent.futures.ThreadPoolExecutor (parallel tasks)
+- pandas (table + chart data)
+- json, re, urllib (parsing and processing)
+
+AI integration:
+- OpenRouter Chat Completions API
+- Model currently configured: openai/gpt-4.1
+
+Data sources:
+- AI-generated cross-platform product matching
+- Live Amazon search scraping (real-time bonus data)
+
+
+3) Project files
+----------------
+- app.py: Main Streamlit app (UI + search + rendering)
+- requirements.txt: Python dependencies
+
+
+4) How the app works (internal flow)
+------------------------------------
+1. User enters product name or product URL.
+2. App detects whether input is text or URL.
+3. App runs two tasks in parallel:
+   - Task A: Ask LLM to find product prices across all platforms.
+   - Task B: Scrape Amazon live search results.
+4. App parses LLM JSON response and validates entries.
+5. App merges results:
+   - Amazon scraping results are preferred when available.
+   - LLM is used for other platforms.
+6. App calculates best price and savings.
+7. App renders cards, chart, and comparison table.
+
+
+5) Run commands (Windows PowerShell)
+------------------------------------
+Open PowerShell in project folder and run:
+
+cd C:/Users/Purv/OneDrive/Desktop/price_comparator/price_comparator
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
+
+If Python launcher is installed, this also works:
+py -m pip install -r requirements.txt
+py -m streamlit run app.py
+
+After start, open the URL shown in terminal (usually http://localhost:8501).
+
+
+6) Proper way to use this project
+---------------------------------
+Best practices:
+- Enter specific product names including model/variant (example: "iPhone 15 128GB Black").
+- For clothing/shoes, include brand + full name.
+- If using URL input, paste full product URL.
+- Compare the first card result and also check additional results in each platform expander.
+- Click "Visit Store" to verify final price/availability before purchase.
+
+Limitations:
+- Prices can change frequently on e-commerce sites.
+- LLM-based data can be approximate for some products.
+- Amazon scraping may sometimes fail due to anti-bot or layout changes.
+- Product matching across platforms is similarity-based, not guaranteed exact SKU match.
+
+
+7) Important configuration note
+-------------------------------
+In app.py, OpenRouter API key is currently hardcoded.
+For safer usage, move the key to an environment variable before production.
+
+Recommended environment variable:
+- OPENROUTER_API_KEY
+
+Then in code, read it using os.getenv("OPENROUTER_API_KEY").
+
+
+8) Troubleshooting
+------------------
+Issue: streamlit command not found
+Fix:
+- Use: python -m streamlit run app.py
+
+Issue: ModuleNotFoundError
+Fix:
+- Run: python -m pip install -r requirements.txt
+
+Issue: No results returned
+Fix:
+- Try a clearer product name
+- Try another platform URL
+- Retry after some time (network/API limits)
+
+
+9) Recommended environment
+--------------------------
+- OS: Windows 10/11, macOS, or Linux
+- Python: 3.10 or newer
+- Internet: Required (API calls + web scraping)
+
+
+END OF GUIDE
