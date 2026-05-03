@@ -48,6 +48,13 @@ export default function WishlistNavbar() {
             </NavLink>
 
             <NavLink
+              to="/dashboard"
+              className="text-slate-600 hover:text-primary"
+            >
+              Dashboard
+            </NavLink>
+
+            <NavLink
               to="/wishlist"
               className="font-bold border-b-2 border-primary pb-1"
             >

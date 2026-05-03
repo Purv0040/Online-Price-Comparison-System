@@ -63,6 +63,12 @@ export default function ProductDetailsNavbarV2() {
               >
                 Categories
               </NavLink>
+              <NavLink
+                to="/dashboard"
+                className="text-sm font-medium text-slate-700 hover:text-primary"
+              >
+                Dashboard
+              </NavLink>
             </nav>
 
             {/* Wishlist */}

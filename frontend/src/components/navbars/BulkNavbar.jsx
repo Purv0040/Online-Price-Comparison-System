@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom"
+
 export default function BulkNavbar() {
+  const navigate = useNavigate()
   return (
     <header className="sticky top-0 z-50 bg-white px-6 py-3">
       <div className="max-w-[1280px] mx-auto flex justify-between items-center">
@@ -23,6 +26,12 @@ export default function BulkNavbar() {
         <div className="flex items-center gap-4">
           {/* Search with icon */}
           <nav className="hidden lg:flex gap-8 text-sm font-medium">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="text-gray-700 hover:text-blue-600 transition-colors font-semibold text-sm"
+            >
+              Dashboard
+            </button>
             <a href="#">Price_History</a>
             <a href="#">wishlist</a>
           </nav>
@@ -37,3 +46,4 @@ export default function BulkNavbar() {
     </header>
   );
 }
+

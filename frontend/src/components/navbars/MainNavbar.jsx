@@ -40,7 +40,7 @@ export default function MainNavbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-1 sm:gap-3">
-          
+
           <button
             onClick={handleWishlistClick}
             className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 transition"
@@ -89,7 +89,7 @@ export default function MainNavbar() {
                     onClick={() => setShowMenu(false)}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
                   >
-                    <span className="material-symbols-outlined text-sm align-middle">dashboard</span> Dashboard
+                    Dashboard
                   </NavLink>
                   <hr className="my-1" />
                   <button

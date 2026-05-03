@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom"
+
 export default function SearchNavbarV2() {
+  const navigate = useNavigate()
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-6">
@@ -53,6 +56,17 @@ export default function SearchNavbarV2() {
           {/* RIGHT: Actions */}
           <div className="flex items-center gap-4 shrink-0">
 
+            {/* Dashboard */}
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="hidden md:flex text-sm font-semibold text-slate-900 hover:text-blue-600 transition-colors"
+            >
+              Dashboard
+            </button>
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-slate-300"></div>
+
             {/* Wishlist */}
             <button className="relative">
               <svg
@@ -100,3 +114,4 @@ export default function SearchNavbarV2() {
     </header>
   )
 }
+

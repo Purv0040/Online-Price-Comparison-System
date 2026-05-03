@@ -104,6 +104,12 @@ export default function SearchNavbar() {
               Categories
             </button>
             <button
+              onClick={() => navigate("/dashboard")}
+              className="text-sm font-medium text-[#0e121b] hover:text-primary transition-colors"
+            >
+              Dashboard
+            </button>
+            <button
               onClick={handleWishlistClick}
               className="text-sm font-medium text-[#0e121b] hover:text-primary transition-colors"
             >

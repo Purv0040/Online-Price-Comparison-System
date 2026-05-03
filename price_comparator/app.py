@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # ──────────────────────────────────────────────
 # CONFIG
 # ──────────────────────────────────────────────
-OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
+
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL = "openai/gpt-4.1"
 
@@ -91,6 +91,28 @@ def inject_css():
     .chart-title{font-size:1.3rem;font-weight:700;margin:1rem 0 .5rem}
     .footer{text-align:center;color:#9ca3af;font-size:.78rem;padding:2rem 0 1rem;line-height:1.6}
     #MainMenu,footer,header{visibility:hidden}
+    /* ── Match Search button blue ── */
+    div.stButton > button[kind="primary"],
+    div.stButton > button[data-testid="baseButton-primary"]{
+        background:#3461FF !important;
+        border-color:#3461FF !important;
+        color:#fff !important;
+        font-weight:700 !important;
+        border-radius:10px !important;
+        box-shadow:0 2px 12px rgba(52,97,255,.35) !important;
+        transition:background .18s,box-shadow .18s,transform .12s !important;
+    }
+    div.stButton > button[kind="primary"]:hover,
+    div.stButton > button[data-testid="baseButton-primary"]:hover{
+        background:#2248e0 !important;
+        border-color:#2248e0 !important;
+        box-shadow:0 4px 18px rgba(52,97,255,.50) !important;
+        transform:translateY(-1px) !important;
+    }
+    div.stButton > button[kind="primary"]:active,
+    div.stButton > button[data-testid="baseButton-primary"]:active{
+        transform:translateY(0) !important;
+    }
     </style>""", unsafe_allow_html=True)
     # Load Material Symbols font for the logo icon
     st.markdown('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />', unsafe_allow_html=True)
